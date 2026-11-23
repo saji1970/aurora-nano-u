@@ -8,7 +8,8 @@ multiply y = W·x with INT8 or INT4 weights, on a 2.0 × 2.0 mm die.
 Design documents: [Aurora-1 GPU architecture](docs/aurora-1-architecture.md) (the full design this
 comes from) and [Aurora-Nano for glasses](docs/aurora-nano-glasses.md) (the 2 × 2 mm language-model
 chip this package scales down). The [glasses main board](docs/glasses-board.md) shows the
-Android SoC, memory, displays, 5G and power around it.
+Android SoC, memory, displays, 5G and power around it, and the
+[packaging plan](docs/glasses-packaging.md) shows how it fits in the frame.
 
 ## What the chip does
 
@@ -62,6 +63,7 @@ configuration follows OpenROAD-flow-scripts' own IHP pad-ring example
 | `syn/aurora_nano_u_netlist.v` | synthesized gate-level netlist |
 | `scripts/lib2models.py` | functional cell models for gate-level simulation |
 | `scripts/glasses_board_diagram.py` | draws the glasses main-board block diagram |
+| `scripts/glasses_packaging_diagram.py` | draws the glasses packaging plan |
 | `flow/aurora_nano_u/` | OpenROAD-flow-scripts config: `config.mk`, SDC, power grid |
 | `results/` | logs from the runs above |
 | `docs/` | design documents and block diagrams |
