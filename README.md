@@ -5,6 +5,10 @@ A teaching-scale tapeout of the Aurora-Nano language-model accelerator for
 It runs the core operation of a small language model, a matrix-vector
 multiply y = W·x with INT8 or INT4 weights, on a 2.0 × 2.0 mm die.
 
+Design documents: [Aurora-1 GPU architecture](docs/aurora-1-architecture.md) (the full design this
+comes from) and [Aurora-Nano for glasses](docs/aurora-nano-glasses.md) (the 2 × 2 mm language-model
+chip this package scales down).
+
 ## What the chip does
 
 A host (microcontroller or FPGA) loads weights and an activation vector over
@@ -58,6 +62,7 @@ configuration follows OpenROAD-flow-scripts' own IHP pad-ring example
 | `scripts/lib2models.py` | functional cell models for gate-level simulation |
 | `flow/aurora_nano_u/` | OpenROAD-flow-scripts config: `config.mk`, SDC, power grid |
 | `results/` | logs from the runs above |
+| `docs/` | design documents and block diagrams |
 
 ## Reproduce the checks
 
