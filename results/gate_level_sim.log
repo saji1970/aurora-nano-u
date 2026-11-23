@@ -1,0 +1,15 @@
+Gate-level simulation of syn/aurora_nano_u_netlist.v (functional IHP cell models)
+== smallest INT8 (1 x 8) ==
+ID register reads a5
+test 0: int4=0 relu=0 rows=1 cols=8 shift=0 wbase=0 done
+PASS: 1 tests, 2 results checked, 0 errors
+== full INT8 (32 x 32, shift 8) ==
+WARNING: tb_aurora_nano_u.v:53: $readmemh(tests.hex): Not enough words in the file for the requested range [0:200000].
+ID register reads a5
+test 0: int4=0 relu=0 rows=32 cols=32 shift=8 wbase=0 done
+PASS: 1 tests, 64 results checked, 0 errors
+== INT4 + ReLU, offset base (7 x 24) ==
+WARNING: tb_aurora_nano_u.v:53: $readmemh(tests.hex): Not enough words in the file for the requested range [0:200000].
+ID register reads a5
+test 0: int4=1 relu=1 rows=7 cols=24 shift=6 wbase=5 done
+PASS: 1 tests, 14 results checked, 0 errors

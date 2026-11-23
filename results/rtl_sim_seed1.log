@@ -1,0 +1,24 @@
+WARNING: tb_aurora_nano_u.v:53: $readmemh(tests.hex): Not enough words in the file for the requested range [0:200000].
+ID register reads a5
+test 0: int4=0 relu=0 rows=1 cols=8 shift=0 wbase=0 done
+test 1: int4=0 relu=0 rows=32 cols=32 shift=8 wbase=0 done
+test 2: int4=0 relu=1 rows=16 cols=64 shift=10 wbase=0 done
+test 3: int4=1 relu=0 rows=32 cols=64 shift=9 wbase=0 done
+test 4: int4=1 relu=1 rows=7 cols=24 shift=6 wbase=5 done
+test 5: int4=0 relu=0 rows=5 cols=16 shift=0 wbase=100 done
+test 6: int4=0 relu=0 rows=32 cols=32 shift=31 wbase=0 done
+test 7: int4=1 relu=0 rows=32 cols=64 shift=0 wbase=0 done
+test 8: int4=1 relu=0 rows=14 cols=32 shift=6 wbase=94 done
+test 9: int4=0 relu=1 rows=2 cols=32 shift=12 wbase=53 done
+test 10: int4=0 relu=1 rows=1 cols=24 shift=1 wbase=67 done
+test 11: int4=1 relu=0 rows=24 cols=24 shift=4 wbase=41 done
+test 12: int4=0 relu=1 rows=7 cols=8 shift=5 wbase=86 done
+test 13: int4=1 relu=1 rows=5 cols=16 shift=8 wbase=26 done
+test 14: int4=1 relu=1 rows=9 cols=40 shift=16 wbase=51 done
+test 15: int4=1 relu=0 rows=32 cols=24 shift=1 wbase=26 done
+test 16: int4=0 relu=1 rows=17 cols=56 shift=8 wbase=2 done
+test 17: int4=1 relu=1 rows=25 cols=40 shift=14 wbase=49 done
+test 18: int4=1 relu=1 rows=30 cols=8 shift=6 wbase=42 done
+test 19: int4=1 relu=0 rows=22 cols=40 shift=12 wbase=50 done
+PASS: 20 tests, 690 results checked, 0 errors
+tb_aurora_nano_u.v:130: $finish called at 20596600000 (1ps)

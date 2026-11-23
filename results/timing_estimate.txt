@@ -1,0 +1,1 @@
+slow corner 1.08 V 125 C, logic only (no wire load): WireLoad = "none"  Gates =  72435 ( 15.4 %)   Cap =  5.8 ff (  3.6 %)   Area =   602067.75 ( 91.4 %)   Delay =  7335.36 ps  (  0.1 %)               

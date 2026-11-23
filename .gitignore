@@ -1,0 +1,6 @@
+tb/sim
+tb/sim_chip
+tb/sim_gl
+tb/tests.hex
+tb/sg13g2_cells_functional.v
+syn/*.lib

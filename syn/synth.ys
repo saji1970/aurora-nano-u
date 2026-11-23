@@ -1,0 +1,10 @@
+read_verilog -sv ../rtl/an_spi_slave.v ../rtl/an_mv_engine.v ../rtl/aurora_nano_u.v
+synth -top aurora_nano_u -flatten
+dfflibmap -liberty sg13g2_stdcell_typ_1p20V_25C.lib
+abc -liberty sg13g2_stdcell_typ_1p20V_25C.lib -D 20000
+opt_clean -purge
+hilomap -singleton -hicell sg13g2_tiehi L_HI -locell sg13g2_tielo L_LO
+setundef -zero
+stat -liberty sg13g2_stdcell_typ_1p20V_25C.lib
+check
+write_verilog -noattr aurora_nano_u_netlist.v
