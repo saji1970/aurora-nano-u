@@ -1,0 +1,692 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Aurora glasses render</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { width: 2400px; height: 1500px; overflow: hidden;
+         background: radial-gradient(ellipse at 50% 40%, #ffffff 0%, #eef0f3 45%, #d9dde3 100%);
+         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  #wrap { position: relative; width: 2400px; height: 1500px; }
+  canvas { position: absolute; left: 0; top: 0; }
+  svg { position: absolute; left: 0; top: 0; pointer-events: none; }
+  .title { position: absolute; left: 70px; top: 54px; color: #1b1f24; }
+  .title h1 { margin: 0; font-size: 46px; font-weight: 600; letter-spacing: -0.5px; }
+  .title p { margin: 8px 0 0; font-size: 24px; color: #5b6470; }
+  .foot { position: absolute; right: 70px; bottom: 44px; font-size: 18px; color: #7b8490; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "/node_modules/three/build/three.module.js",
+  "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="wrap">
+  <div class="title" id="title"></div>
+  <div class="foot" id="foot"></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const params = new URLSearchParams(location.search);
+const MODE = params.get('mode') || 'assembled';   // assembled | exploded | front
+const EXPLODED = MODE === 'exploded';
+const W = 2400, H = 1500;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('wrap').prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = (() => { const c = document.createElement('canvas'); c.width = 1200; c.height = 750; const g = c.getContext('2d');
+  const grd = g.createRadialGradient(600, 300, 50, 600, 375, 820); grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.45, '#eef0f3'); grd.addColorStop(1, '#d6dae0');
+  g.fillStyle = grd; g.fillRect(0, 0, 1200, 750); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.9;
+
+// ---------- lights ----------
+const key = new THREE.DirectionalLight(0xffffff, 2.4);
+key.position.set(-120, 320, 160);
+key.castShadow = true;
+key.shadow.mapSize.set(4096, 4096);
+const sc = key.shadow.camera;
+sc.left = -330; sc.right = 330; sc.top = 330; sc.bottom = -330; sc.near = 10; sc.far = 900;
+key.shadow.radius = 6; key.shadow.bias = -0.0004;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xdfe8ff, 1.1);
+rim.position.set(260, 120, -260);
+scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xffffff, 0xc8ccd2, 0.5));
+
+// ---------- textures ----------
+function canvasTex(w, h, draw, srgb = true) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); draw(g, w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+let seed = 7;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+const pcbTex = canvasTex(1536, 384, (g, w, h) => {
+  g.fillStyle = '#0d3b2a'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 520; i++) {
+    g.strokeStyle = rnd() < 0.5 ? 'rgba(60,150,100,0.55)' : 'rgba(40,120,80,0.45)';
+    g.lineWidth = 1 + rnd() * 3;
+    let x = rnd() * w, y = rnd() * h;
+    g.beginPath(); g.moveTo(x, y);
+    for (let k = 0; k < 3; k++) {
+      if (rnd() < 0.5) x += (rnd() - 0.5) * 300; else y += (rnd() - 0.5) * 140;
+      g.lineTo(x, y);
+    }
+    g.stroke();
+  }
+  for (let i = 0; i < 900; i++) {
+    g.fillStyle = 'rgba(214,176,92,0.9)';
+    g.beginPath(); g.arc(rnd() * w, rnd() * h, 2 + rnd() * 2.5, 0, 7); g.fill();
+  }
+  g.fillStyle = 'rgba(235,240,235,0.85)'; g.font = '22px Helvetica';
+  g.fillText('AURORA', 30, h - 26);
+  g.fillText('REV A  10L HDI', w - 220, 40);
+});
+const radioTex = pcbTex.clone(); radioTex.needsUpdate = true;
+
+function chipTex(lines, bg = '#141416') {
+  return canvasTex(512, 512, (g, w, h) => {
+    g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(160,165,170,0.85)';
+    g.font = 'bold 74px Helvetica'; g.textAlign = 'center';
+    lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 - (lines.length - 1) * 45 + i * 92 + 24));
+    g.beginPath(); g.arc(50, 50, 14, 0, 7); g.fill();
+  });
+}
+const batteryTex = canvasTex(1024, 256, (g, w, h) => {
+  const grd = g.createLinearGradient(0, 0, 0, h);
+  grd.addColorStop(0, '#d9dce0'); grd.addColorStop(0.5, '#f4f5f6'); grd.addColorStop(1, '#c9ccd1');
+  g.fillStyle = grd; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#1f5fbf'; g.fillRect(40, 40, w - 80, h - 80);
+  g.fillStyle = '#ffffff'; g.font = 'bold 56px Helvetica'; g.fillText('Li-Po  3.85 V', 80, 120);
+  g.font = '40px Helvetica'; g.fillText('340 mAh · 1.3 Wh', 80, 180);
+});
+const lgaTex = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = '#2b2b2b'; g.fillRect(0, 0, w, h);
+});
+const brushedTex = canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = '#808080'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 2400; i++) {
+    const v = 110 + rnd() * 50; g.strokeStyle = `rgba(${v},${v},${v},0.35)`;
+    const y = rnd() * h; g.beginPath(); g.moveTo(0, y); g.lineTo(w, y + (rnd() - 0.5) * 3); g.stroke();
+  }
+}, false);
+const antennaTex = canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = '#2a2e33'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#d4a650'; g.lineWidth = 26; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(40, 460);
+  for (let i = 0; i < 6; i++) { g.lineTo(40 + i * 80, i % 2 ? 460 : 60); g.lineTo(80 + i * 80, i % 2 ? 460 : 60); }
+  g.stroke();
+});
+const speakerTex = canvasTex(512, 256, (g, w, h) => {
+  g.fillStyle = '#1a1b1e'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#050506';
+  for (let x = 30; x < w - 20; x += 26) for (let y = 30; y < h - 20; y += 26) { g.beginPath(); g.arc(x, y, 8, 0, 7); g.fill(); }
+});
+
+// ---------- materials ----------
+const M = {
+  frame: new THREE.MeshPhysicalMaterial({ color: 0x1d1e22, roughness: 0.32, metalness: 0.0, clearcoat: 0.9, clearcoatRoughness: 0.12, sheen: 0.2 }),
+  frameInner: new THREE.MeshPhysicalMaterial({ color: 0x26272c, roughness: 0.55, metalness: 0.0, clearcoat: 0.3 }),
+  touch: new THREE.MeshPhysicalMaterial({ color: 0x2c2e33, roughness: 0.18, metalness: 0.2, clearcoat: 1.0, clearcoatRoughness: 0.04 }),
+  antennaWin: new THREE.MeshPhysicalMaterial({ color: 0x35373c, roughness: 0.6, metalness: 0.0 }),
+  lens: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, metalness: 0, transmission: 0.0, opacity: 0.22, ior: 1.6, depthWrite: false,
+    iridescence: 0.3, iridescenceIOR: 1.35, iridescenceThicknessRange: [180, 420], attenuationColor: new THREE.Color(0xbfd6e6), attenuationDistance: 120,
+    specularIntensity: 1, envMapIntensity: 1.4, transparent: true }),
+  metal: new THREE.MeshPhysicalMaterial({ color: 0xc9ccd1, roughness: 0.28, metalness: 1.0, roughnessMap: brushedTex }),
+  darkMetal: new THREE.MeshPhysicalMaterial({ color: 0x55585e, roughness: 0.35, metalness: 1.0 }),
+  gold: new THREE.MeshPhysicalMaterial({ color: 0xe2b24f, roughness: 0.25, metalness: 1.0 }),
+  pcb: new THREE.MeshPhysicalMaterial({ map: pcbTex, roughness: 0.45, clearcoat: 0.6, clearcoatRoughness: 0.3 }),
+  pcbEdge: new THREE.MeshStandardMaterial({ color: 0x1c4a33, roughness: 0.6 }),
+  flex: new THREE.MeshPhysicalMaterial({ color: 0xd18a22, roughness: 0.35, metalness: 0.1, clearcoat: 0.8, transmission: 0.0, side: THREE.DoubleSide }),
+  graphite: new THREE.MeshPhysicalMaterial({ color: 0x3a3b3f, roughness: 0.42, metalness: 0.65 }),
+  battery: new THREE.MeshPhysicalMaterial({ map: batteryTex, roughness: 0.35, metalness: 0.3, clearcoat: 0.5 }),
+  batteryPouch: new THREE.MeshPhysicalMaterial({ color: 0xd8dbe0, roughness: 0.3, metalness: 0.6 }),
+  rubber: new THREE.MeshPhysicalMaterial({ color: 0xe8ecef, roughness: 0.4, transmission: 0.6, thickness: 2, transparent: true }),
+  glassDark: new THREE.MeshPhysicalMaterial({ color: 0x0b0d1a, roughness: 0.02, metalness: 0.4, clearcoat: 1.0, iridescence: 1.0, iridescenceThicknessRange: [300, 600] }),
+  speaker: new THREE.MeshPhysicalMaterial({ map: speakerTex, roughness: 0.6 }),
+  antenna: new THREE.MeshPhysicalMaterial({ map: antennaTex, roughness: 0.4, metalness: 0.5 }),
+  black: new THREE.MeshPhysicalMaterial({ color: 0x18181b, roughness: 0.5 }),
+  ceramic: new THREE.MeshPhysicalMaterial({ color: 0x9a7b55, roughness: 0.5 }),
+};
+
+// ---------- helpers ----------
+const labels = [];  // {obj, local, title, sub}
+function addLabel(obj, title, sub, local = new THREE.Vector3(), pref) { labels.push({ obj, local, title, sub, pref }); }
+function shadowy(o) { o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; }
+function rbox(w, h, d, r, mat) { return shadowy(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 4, Math.min(r, w / 2, h / 2, d / 2) * 0.999), mat)); }
+function box(w, h, d, mat) { return shadowy(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat)); }
+function cyl(r, len, mat, seg = 48) { return shadowy(new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, seg), mat)); }
+
+// Superellipse lens outline
+function lensPts(cx, cy, a, b, n = 3.4, nb = 2.5, N = 120) {
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * Math.PI * 2;
+    const c = Math.cos(t), s = Math.sin(t);
+    const e = s < 0 ? nb : n;
+    pts.push(new THREE.Vector2(cx + a * Math.sign(c) * Math.pow(Math.abs(c), 2 / e), cy + b * Math.sign(s) * Math.pow(Math.abs(s), 2 / e)));
+  }
+  return pts;
+}
+function lensBottom(x, cx, a, b, nb = 2.5) {
+  const u = Math.abs(x - cx) / a;
+  if (u >= 1) return Infinity;
+  return -b * Math.pow(1 - Math.pow(u, nb), 1 / nb);
+}
+function chaikin(pts, it = 3) {
+  for (let k = 0; k < it; k++) {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i], q = pts[(i + 1) % pts.length];
+      out.push(new THREE.Vector2(0.75 * p.x + 0.25 * q.x, 0.75 * p.y + 0.25 * q.y));
+      out.push(new THREE.Vector2(0.25 * p.x + 0.75 * q.x, 0.25 * p.y + 0.75 * q.y));
+    }
+    pts = out;
+  }
+  return pts;
+}
+
+// ---------- dimensions (mm) ----------
+const LX = 34, LA = 25, LB = 19;      // lens centre x, half width, half height
+const RIM = 4;
+const TOP = LB + RIM;                 // 23
+const ARM_X = 71.5, ARM_T = 6.5;
+
+// ---------- front frame ----------
+function frontShape() {
+  const top = [], bot = [];
+  const X0 = -75, X1 = 75;
+  for (let x = X0; x <= X1 + 1e-6; x += 0.5) {
+    let yb = Math.min(lensBottom(x, -LX, LA + RIM, LB + RIM), lensBottom(x, LX, LA + RIM, LB + RIM));
+    if (Math.abs(x) < 9) yb = Math.min(yb, 7);       // bridge
+    if (Math.abs(x) > 60) yb = Math.min(yb, 4);      // end piece
+    if (!isFinite(yb)) yb = 7;
+    bot.push(new THREE.Vector2(x, yb));
+    // top line with gentle brow curve
+    const yt = TOP + 0.6 * Math.cos((x / 75) * Math.PI * 1.0) * 0 + (Math.abs(x) < 9 ? -1.2 * (1 - Math.abs(x) / 9) : 0);
+    top.push(new THREE.Vector2(x, yt));
+  }
+  const pts = chaikin([...bot, ...top.reverse()], 3);
+  const shape = new THREE.Shape(pts);
+  [-LX, LX].forEach(cx => shape.holes.push(new THREE.Path(lensPts(cx, 0, LA, LB).reverse())));
+  return shape;
+}
+function buildFrontFrame() {
+  const g = new THREE.Group();
+  const geo = new THREE.ExtrudeGeometry(frontShape(), { depth: 4.2, bevelEnabled: true, bevelThickness: 0.9, bevelSize: 0.9, bevelSegments: 5, curveSegments: 64 });
+  geo.translate(0, 0, -2.1);
+  const m = shadowy(new THREE.Mesh(geo, M.frame));
+  g.add(m);
+  // end pieces / hinge blocks
+  [-1, 1].forEach(s => {
+    const e = rbox(9.5, 17.5, 16, 2.6, M.frame);
+    e.position.set(s * 71, 13.8, -6.5);
+    g.add(e);
+  });
+  // nose pads
+  [-1, 1].forEach(s => {
+    const armP = cyl(0.5, 9, M.metal, 16);
+    armP.rotation.x = Math.PI / 2.6; armP.position.set(s * 8.5, -3, -5.5); g.add(armP);
+    const pad = shadowy(new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), M.rubber));
+    pad.scale.set(3.2, 6, 1.6); pad.rotation.y = s * 0.6; pad.position.set(s * 10.5, -7, -10);
+    g.add(pad);
+  });
+  return g;
+}
+
+function buildLens(cx) {
+  const shape = new THREE.Shape(lensPts(cx, 0, LA + 0.9, LB + 0.9));
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: 1.4, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 3, curveSegments: 64 });
+  geo.translate(0, 0, -0.7);
+  const m = new THREE.Mesh(geo, M.lens);
+  m.castShadow = false; m.receiveShadow = false;
+  const g = new THREE.Group(); g.add(m);
+  // in-coupling grating near the outer edge
+  const s = Math.sign(cx);
+  const grating = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 7), new THREE.MeshPhysicalMaterial({ color: 0x8fa6c4, roughness: 0.15, metalness: 0.6, iridescence: 1, iridescenceThicknessRange: [200, 700], transparent: true, opacity: 0.55 }));
+  grating.position.set(cx + s * (LA - 4), 6, 0.95);
+  if (EXPLODED) g.add(grating);
+  return g;
+}
+
+// ---------- arm ----------
+function armShape() {
+  const s = new THREE.Shape();
+  s.moveTo(16, 6.2);
+  s.quadraticCurveTo(80, 6.4, 150, 7.2);
+  s.quadraticCurveTo(164, 6.6, 171, -12);
+  s.quadraticCurveTo(174.5, -19, 179.5, -15.5);
+  s.quadraticCurveTo(181.5, -12, 178, -4);
+  s.quadraticCurveTo(170, 17, 152, 19.2);
+  s.quadraticCurveTo(80, 21.6, 16, 21.8);
+  s.quadraticCurveTo(14.6, 14, 16, 6.2);
+  return s;
+}
+function armGeo(depth) {
+  const geo = new THREE.ExtrudeGeometry(armShape(), { depth, bevelEnabled: true, bevelThickness: 0.8, bevelSize: 0.8, bevelSegments: 5, curveSegments: 80 });
+  return geo;
+}
+// place geometry built in (u=length back, v=y, w=thickness) into world
+function placeArm(obj, side, xInner) {
+  // local x -> world -z ; local z -> world +x  (rotation y = +90deg)
+  obj.rotation.y = Math.PI / 2;
+  obj.position.x = xInner;
+}
+function armCenterY(u) { // centre height of arm at length u
+  const top = 21.8 + (19.2 - 21.8) * Math.min(1, (u - 16) / 136);
+  const bot = 6.2 + (7.2 - 6.2) * Math.min(1, (u - 16) / 134);
+  return (top + bot) / 2;
+}
+
+// sub-assembly builders (local coords: x along arm (back = +), y up, z out of board, +z = outer side when outerSign=+1)
+function chip(w, h, t, tex, mat) {
+  const mats = mat || new THREE.MeshPhysicalMaterial({ color: 0x141416, roughness: 0.4, clearcoat: 0.4 });
+  const m = rbox(w, h, t, 0.25, mats);
+  if (tex) {
+    const top = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.96, h * 0.96), new THREE.MeshPhysicalMaterial({ map: tex, roughness: 0.45, clearcoat: 0.4 }));
+    top.position.z = t / 2 + 0.01; m.add(top);
+  }
+  return m;
+}
+function passives(group, z, count, xmin, xmax, ymin, ymax, side) {
+  for (let i = 0; i < count; i++) {
+    const w = 0.6 + rnd() * 0.6, hgt = 0.3 + rnd() * 0.3;
+    const p = box(w, hgt, 0.3, rnd() < 0.6 ? M.ceramic : M.black);
+    p.position.set(xmin + rnd() * (xmax - xmin), ymin + rnd() * (ymax - ymin), z + side * 0.15);
+    if (rnd() < 0.5) p.rotation.z = Math.PI / 2;
+    group.add(p);
+  }
+}
+function buildBoard(kind, out) {
+  // out = +1 if outer side is local +z
+  const g = new THREE.Group();
+  const L = 60, Hh = 13, T = 0.8;
+  const geo = new RoundedBoxGeometry(L, Hh, T, 2, 0.39);
+  const pcb = shadowy(new THREE.Mesh(geo, M.pcb));
+  g.add(pcb);
+  const oz = out * (T / 2), iz = -out * (T / 2);
+  const parts = {};
+  if (kind === 'main') {
+    // outer side: SoC + stacked 16GB (PoP), shield can, flex connector
+    const soc = new THREE.Group();
+    const sub = chip(12, 12, 0.7, null, new THREE.MeshPhysicalMaterial({ color: 0x2a3a2a, roughness: 0.5 })); soc.add(sub);
+    const mem = chip(11.4, 11.4, 0.7, chipTex(['16GB', 'LPDDR5X'])); mem.position.z = out * 0.7; soc.add(mem);
+    if (out < 0) mem.rotation.y = Math.PI;
+    soc.position.set(-14, 0, oz + out * 0.35);
+    g.add(soc); parts.soc = soc;
+    const can = rbox(22, 11, 1.2, 0.3, M.metal); can.position.set(9, 0, oz + out * 0.6); g.add(can); parts.can = can;
+    const conn = rbox(3.5, 7, 1.0, 0.2, M.black); conn.position.set(-27.2, 0, oz + out * 0.5); g.add(conn); parts.conn = conn;
+    // inner side: UFS + PMIC + passives
+    const ufs = chip(11.5, 10, 0.9, chipTex(['UFS 4.0', '256GB'])); ufs.position.set(-12, 0, iz - out * 0.45); if (out > 0) ufs.rotation.y = Math.PI; g.add(ufs); parts.ufs = ufs;
+    const pmic = chip(7, 7, 0.8, chipTex(['PMIC'])); pmic.position.set(4, 1.5, iz - out * 0.4); if (out > 0) pmic.rotation.y = Math.PI; g.add(pmic); parts.pmic = pmic;
+    passives(g, iz, 90, 10, 28, -5.5, 5.5, -out);
+    passives(g, iz, 40, -28, -19, -5.5, 5.5, -out);
+    passives(g, oz, 40, -27, -21, -5.5, 5.5, out);
+  } else {
+    const modem = rbox(16, 11, 1.3, 0.3, M.metal); modem.position.set(-15, 0, oz + out * 0.65); g.add(modem); parts.modem = modem;
+    const rf = rbox(12, 11, 1.1, 0.3, M.metal); rf.position.set(2, 0, oz + out * 0.55); g.add(rf); parts.rf = rf;
+    const conn = rbox(3.5, 7, 1.0, 0.2, M.black); conn.position.set(-27.2, 0, oz + out * 0.5); g.add(conn);
+    const wifi = chip(7, 7, 0.8, chipTex(['WiFi 7', 'BT'])); wifi.position.set(-14, 0, iz - out * 0.4); if (out > 0) wifi.rotation.y = Math.PI; g.add(wifi); parts.wifi = wifi;
+    const chg = chip(4.5, 4.5, 0.7, chipTex(['CHG'])); chg.position.set(-4, 2.5, iz - out * 0.35); if (out > 0) chg.rotation.y = Math.PI; g.add(chg); parts.chg = chg;
+    const aud = chip(4.5, 4.5, 0.7, chipTex(['AUD'])); aud.position.set(4, -2.5, iz - out * 0.35); if (out > 0) aud.rotation.y = Math.PI; g.add(aud); parts.aud = aud;
+    passives(g, iz, 110, -28, 28, -5.5, 5.5, -out);
+    passives(g, oz, 50, 12, 28, -5.5, 5.5, out);
+    // u.FL / antenna feed
+    const ufl = cyl(0.9, 0.7, M.gold, 20); ufl.rotation.x = Math.PI / 2; ufl.position.set(22, 3, oz + out * 0.35); g.add(ufl);
+  }
+  return { g, parts };
+}
+
+function buildBattery() {
+  const g = new THREE.Group();
+  const cell = rbox(46, 10, 5.6, 1.2, M.batteryPouch); g.add(cell);
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(42, 8.4), M.battery);
+  g.userData.label = lab; g.add(lab);
+  const tab1 = box(3, 2, 0.15, M.metal); tab1.position.set(-24.5, 2, 0); g.add(tab1);
+  const tab2 = box(3, 2, 0.15, M.metal); tab2.position.set(-24.5, -2, 0); g.add(tab2);
+  const pcm = box(2.2, 9, 1.6, new THREE.MeshPhysicalMaterial({ color: 0x15402c, roughness: 0.5 })); pcm.position.set(-27, 0, 0); g.add(pcm);
+  return g;
+}
+function buildSpeaker() {
+  const g = new THREE.Group();
+  const body = rbox(13, 7, 4, 1.2, M.black); g.add(body);
+  const grill = new THREE.Mesh(new THREE.PlaneGeometry(11, 3.6), M.speaker); grill.rotation.x = Math.PI / 2; grill.position.y = -3.52; g.add(grill);
+  const mag = cyl(2.4, 0.8, M.metal, 32); mag.rotation.x = Math.PI / 2; mag.position.z = 2.2; g.add(mag);
+  return g;
+}
+function buildAntenna() {
+  const g = new THREE.Group();
+  const carrier = rbox(12, 10, 1.2, 0.4, M.antenna); g.add(carrier);
+  return g;
+}
+function buildProjector() {
+  const g = new THREE.Group();
+  const body = rbox(10, 6, 6, 0.8, M.darkMetal); g.add(body);
+  const lens = cyl(2.1, 1.6, M.glassDark, 40); lens.rotation.z = Math.PI / 2; lens.position.x = -5.6; g.add(lens);
+  const ring = cyl(2.6, 0.6, M.metal, 40); ring.rotation.z = Math.PI / 2; ring.position.x = -5.1; g.add(ring);
+  const fpc = box(5, 3, 0.15, M.flex); fpc.position.set(6.5, 0, 0); g.add(fpc);
+  return g;
+}
+function buildCamera() {
+  const g = new THREE.Group();
+  const body = rbox(6, 6, 4.5, 0.6, M.black); g.add(body);
+  const barrel = cyl(2.2, 1.8, M.darkMetal, 40); barrel.rotation.x = Math.PI / 2; barrel.position.z = 2.8; g.add(barrel);
+  const glass = cyl(1.6, 0.3, M.glassDark, 40); glass.rotation.x = Math.PI / 2; glass.position.z = 3.75; g.add(glass);
+  const fpc = box(3, 6, 0.15, M.flex); fpc.position.set(0, -5.5, -2); g.add(fpc);
+  return g;
+}
+function ribbon(points, width, mat) {
+  const curve = new THREE.CatmullRomCurve3(points);
+  const N = 80, pos = [], idx = [];
+  for (let i = 0; i <= N; i++) {
+    const p = curve.getPoint(i / N);
+    pos.push(p.x, p.y - width / 2, p.z, p.x, p.y + width / 2, p.z);
+    if (i < N) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+  return shadowy(new THREE.Mesh(geo, mat));
+}
+
+// ---------- assemble ----------
+const root = new THREE.Group(); scene.add(root);
+const E = EXPLODED ? 1 : 0;
+const ex = (v) => v * E;
+
+// Front frame + lenses
+const front = buildFrontFrame(); root.add(front);
+if (EXPLODED) addLabel(front, 'Front frame', 'acetate-over-metal, end pieces hold the hinges', new THREE.Vector3(0, 21.5, 2));
+
+[-1, 1].forEach(s => {
+  const lens = buildLens(s * LX);
+  lens.position.z = ex(48);
+  if (EXPLODED) lens.children[0].material = Object.assign(M.lens.clone(), { color: new THREE.Color(0xb9d2e6), opacity: 0.45 });
+  root.add(lens);
+  if (EXPLODED && s < 0) addLabel(lens, 'Waveguide lens', '1–2 mm, carries the image to the eye', new THREE.Vector3(-LX - 6, -10, 0));
+  if (EXPLODED && s > 0) addLabel(lens, 'In-coupling grating', 'where projector light enters the waveguide', new THREE.Vector3(LX + LA - 4, 6, 1));
+});
+
+// Cameras in front corners
+[-1, 1].forEach(s => {
+  const cam = buildCamera();
+  cam.position.set(s * 63.5, 17, 0.4 + ex(s < 0 ? 90 : 30));
+  cam.position.y += ex(14);
+  root.add(cam);
+  if (EXPLODED && s < 0) addLabel(cam, 'Camera module', '5–7 mm, one in each front corner', new THREE.Vector3(0, 0, 3.5));
+});
+
+// Projectors at hinges
+[-1, 1].forEach(s => {
+  const pj = buildProjector();
+  if (s > 0) pj.rotation.y = Math.PI;
+  pj.position.set(s * 65.5, 13.5 + ex(s < 0 ? 40 : 30), -7 + ex(s < 0 ? 18 : 0));
+  root.add(pj);
+  if (EXPLODED && s < 0) addLabel(pj, 'microLED projector', '6 × 6 × 10 mm, shines into lens edge', new THREE.Vector3(0, 3, 0));
+});
+
+// Frame flex along the top of the front frame
+{
+  const ff = ribbon([
+    new THREE.Vector3(-66, 17, -6), new THREE.Vector3(-60, 20, -3.4), new THREE.Vector3(-20, 20.5, -3.4),
+    new THREE.Vector3(0, 19.6, -3.4), new THREE.Vector3(20, 20.5, -3.4), new THREE.Vector3(60, 20, -3.4), new THREE.Vector3(66, 17, -6)
+  ], 3.2, M.flex);
+  ff.position.set(0, ex(62), ex(-6));
+  root.add(ff);
+  if (EXPLODED) addLabel(ff, 'Frame flex', 'display, camera and board-to-board link', new THREE.Vector3(22, 20.5, -3.4));
+}
+
+// Arms
+const SIDES = [
+  { s: -1, name: 'right', board: 'main' },
+  { s: 1, name: 'left', board: 'radio' },
+];
+const ARM_BACK = ex(26);      // pull arms back
+SIDES.forEach(({ s, name, board }) => {
+  const xOuter = s * (ARM_X + ARM_T / 2);
+  const xInner = s * (ARM_X - ARM_T / 2);
+  const armGroup = new THREE.Group(); armGroup.position.z = -ARM_BACK; root.add(armGroup);
+
+  // hinge barrel
+  const hinge = cyl(1.4, 12, M.metal, 32); hinge.position.set(s * 71, 14, -15); armGroup.add(hinge);
+  if (EXPLODED && s > 0) addLabel(hinge, 'Hinge pin', 'steel barrel, flex wraps around it', new THREE.Vector3(0, 6, 0));
+
+  if (!EXPLODED) {
+    const geo = armGeo(ARM_T - 1.6);
+    const arm = shadowy(new THREE.Mesh(geo, M.frame));
+    placeArm(arm, s, s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X - ARM_T / 2 + 0.8));
+    armGroup.add(arm);
+    // touchpad inset on right arm outer face
+    if (s < 0) {
+      const tp = rbox(55, 10.5, 0.5, 0.25, M.touch);
+      tp.rotation.y = Math.PI / 2; tp.position.set(xOuter - 0.75, armCenterY(50), -50.5);
+      armGroup.add(tp);
+    }
+    // antenna window band
+    const aw = rbox(10, 13.6, ARM_T + 0.9, 0.9, M.antennaWin);
+    aw.rotation.y = Math.PI / 2; aw.position.set(s * ARM_X, armCenterY(88), -88);
+    armGroup.add(aw);
+    // pogo pins under arm
+    for (let i = 0; i < 3; i++) {
+      const p = cyl(0.55, 0.6, M.gold, 16); p.position.set(s * ARM_X, 6.25 + 0.0, -58 - i * 2.4); armGroup.add(p);
+    }
+    // speaker grille under arm near ear
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(10, 3.2), M.speaker); sg.rotation.x = Math.PI / 2; sg.rotation.z = Math.PI / 2;
+    sg.position.set(s * ARM_X, 6.62 - 0.01 - 0.85, -100); armGroup.add(sg);
+    return;
+  }
+
+  // ---- exploded arm ----
+  const SH = 1.6; // shell plate thickness (before bevel)
+  const outerShell = shadowy(new THREE.Mesh(armGeo(SH), M.frame));
+  placeArm(outerShell, s, 0);
+  outerShell.position.x = (s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X + ARM_T / 2 - 0.8 - SH)) + s * 78;
+  armGroup.add(outerShell);
+  addLabel(outerShell, s < 0 ? 'Right arm, outer shell' : 'Left arm, outer shell', 'with plastic antenna window', new THREE.Vector3(120, armCenterY(120) + 2, SH / 2));
+
+  const innerShell = shadowy(new THREE.Mesh(armGeo(SH), M.frameInner));
+  placeArm(innerShell, s, 0);
+  innerShell.position.x = (s < 0 ? -(ARM_X - ARM_T / 2 + 0.8 + SH) : (ARM_X - ARM_T / 2 + 0.8)) - s * 30;
+  armGroup.add(innerShell);
+  if (s > 0) addLabel(innerShell, 'Inner shell', 'skin side, insulated by an air gap', new THREE.Vector3(140, armCenterY(140) - 1, SH), 'L');
+  // pogo pins on inner shell
+  for (let i = 0; i < 3; i++) {
+    const p = cyl(0.6, 1.2, M.gold, 16); p.position.set(innerShell.position.x + SH / 2, 5.0, -58 - i * 2.4);
+    armGroup.add(p);
+    if (i === 1 && s < 0) addLabel(p, 'Pogo charging pins', 'mate with the charging case', new THREE.Vector3(), 'L');
+  }
+
+  if (s < 0) {
+    const tp = rbox(55, 10.5, 0.6, 0.3, M.touch);
+    tp.rotation.y = Math.PI / 2; tp.position.set(xOuter + s * 104, armCenterY(50), -50.5);
+    armGroup.add(tp);
+    addLabel(tp, 'Touchpad', '55 × 12 mm capacitive strip', new THREE.Vector3(-14, 4, 0.3));
+  }
+
+  // graphite heat spreader (main side only) / thermal pad
+  if (board === 'main') {
+    const gr = rbox(52, 12, 0.25, 0.1, M.graphite);
+    gr.rotation.y = Math.PI / 2; gr.position.set(xOuter + s * 54, armCenterY(48), -48);
+    armGroup.add(gr);
+    addLabel(gr, 'Graphite heat spreader', 'moves SoC heat to the outer shell', new THREE.Vector3(18, -3, 0.2));
+  }
+
+  // board
+  const out = s < 0 ? -1 : 1; // local +z maps to world +x
+  const { g: bg, parts } = buildBoard(board, out);
+  bg.rotation.y = Math.PI / 2;
+  bg.position.set(s * 71.3 + s * 32, armCenterY(50), -50);
+  armGroup.add(bg);
+  if (board === 'main') {
+    addLabel(bg, 'Main board', '60 × 13 mm, 10–12 layer HDI, both sides', new THREE.Vector3(24, -5.5, out * 0.4));
+    addLabel(parts.soc, 'XR2-class SoC + 16 GB', 'LPDDR5X stacked on top (PoP)', new THREE.Vector3(0, 3, out * 1.1));
+    addLabel(parts.can, 'Shield can', 'over power stages and PMIC', new THREE.Vector3(5, 3, out * 0.6));
+  } else {
+    addLabel(bg, 'Radio board', '5G modem, RF, Wi-Fi/BT, charger, audio', new THREE.Vector3(-4, -5.8, -out * 0.4));
+    addLabel(parts.wifi, 'Wi-Fi 7 / Bluetooth', 'inner side, with charger and audio', new THREE.Vector3(0, 0, -out * 0.4));
+  }
+
+  // hinge flex
+  const hf = ribbon([
+    new THREE.Vector3(s * 68.5, 14, -4), new THREE.Vector3(s * 70, 14, -10), new THREE.Vector3(s * 73.6, 14, -13.5),
+    new THREE.Vector3(s * 73.6, 14, -16.5), new THREE.Vector3(s * 71.6, 14, -20.5), new THREE.Vector3(s * 71.4, 14, -26)
+  ], 5, M.flex);
+  hf.position.set(s * 8, 26, 4);
+  armGroup.add(hf);
+  if (s > 0) addLabel(hf, 'Hinge flex', 'loops round the hinge pin, folds without creasing', new THREE.Vector3(s * 73.6, 14, -15));
+
+  // antenna
+  const ant = buildAntenna(); ant.rotation.y = Math.PI / 2;
+  ant.position.set(s * 71.3 + s * 8, armCenterY(87) + 20, -87);
+  armGroup.add(ant);
+  if (s < 0) addLabel(ant, 'Antenna', 'LDS trace behind the plastic window', new THREE.Vector3(0, 4, 0));
+
+  // speaker
+  const sp = buildSpeaker(); sp.rotation.y = Math.PI / 2;
+  if (s > 0) sp.rotation.y = -Math.PI / 2;
+  sp.position.set(s * 71.3 + s * 6, armCenterY(100) - 22, -100);
+  armGroup.add(sp);
+  if (s < 0) addLabel(sp, 'Open-ear speaker', 'aims down at the ear canal', new THREE.Vector3(0, -3.5, 0));
+
+  // battery
+  const bat = buildBattery(); bat.rotation.y = Math.PI / 2;
+  if (s < 0) { bat.rotation.y = -Math.PI / 2; }
+  bat.userData.label.position.z = 2.82;
+  bat.position.set(s * 71.3 + s * 18, armCenterY(124), -124);
+  armGroup.add(bat);
+  if (s < 0) addLabel(bat, 'Battery cell', '46 × 10 × 6 mm, ~1.3 Wh, one per arm', new THREE.Vector3(10, 4, 2.8));
+});
+
+// ---------- ground / shadow ----------
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.ShadowMaterial({ opacity: EXPLODED ? 0.0 : 0.22 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = EXPLODED ? -60 : -17.5; ground.receiveShadow = true;
+scene.add(ground);
+
+// ---------- camera ----------
+let camera;
+if (MODE === 'exploded') {
+  camera = new THREE.PerspectiveCamera(24, W / H, 1, 3000);
+  camera.position.set(-14 - 526 * 1.1, 12 + 398 * 1.1, -70 + 540 * 1.1);
+  camera.lookAt(-14, 12, -70);
+  camera.setViewOffset(W, H, -80, -30, W, H);
+} else if (MODE === 'front') {
+  camera = new THREE.PerspectiveCamera(15, W / H, 1, 3000);
+  camera.position.set(-30, 60, 520);
+  camera.lookAt(0, 4, -40);
+} else {
+  camera = new THREE.PerspectiveCamera(22, W / H, 1, 3000);
+  camera.position.set(-330, 150, 330);
+  camera.lookAt(0, 2, -62);
+  camera.setViewOffset(W, H, 0, -20, W, H);
+}
+
+renderer.render(scene, camera);
+renderer.render(scene, camera);
+
+// ---------- labels ----------
+const title = document.getElementById('title');
+const titles = {
+  exploded: ['Aurora smart glasses: exploded view', 'Each part pulled out along the direction it is assembled'],
+  assembled: ['Aurora smart glasses', 'Assembled: about 65–85 g, both arms carry electronics'],
+  front: ['Aurora smart glasses', 'Front view: cameras in the corners, waveguide displays in the lenses'],
+};
+title.innerHTML = `<h1>${titles[MODE][0]}</h1><p>${titles[MODE][1]}</p>`;
+document.getElementById('foot').textContent = 'Concept render from the packaging plan in docs/glasses-packaging.md. Sizes are planning estimates.';
+
+if (labels.length) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('width', W); svg.setAttribute('height', H);
+  document.getElementById('wrap').appendChild(svg);
+  scene.updateMatrixWorld(true);
+  const pts = labels.map(l => {
+    const v = l.local.clone(); l.obj.localToWorld(v); v.project(camera);
+    return { ...l, sx: (v.x + 1) / 2 * W, sy: (1 - v.y) / 2 * H };
+  });
+  const cx = W / 2;
+  const isL = p => p.pref ? p.pref === 'L' : p.sx < cx - 40;
+  const sides = { L: pts.filter(isL), R: pts.filter(p => !isL(p)) };
+  const ROW = 78, TOPY = 230, BOT = H - 110;
+  function layout(list) {
+    list.sort((a, b) => a.sy - b.sy);
+    let y = TOPY;
+    list.forEach(p => { p.ly = Math.max(p.sy, y); y = p.ly + ROW; });
+    // push up if overflow
+    let over = list.length ? list[list.length - 1].ly - BOT : 0;
+    for (let i = list.length - 1; i >= 0 && over > 0; i--) {
+      list[i].ly -= over;
+      if (i > 0) { const gap = list[i].ly - list[i - 1].ly - ROW; over = gap < 0 ? -gap : 0; }
+    }
+  }
+  layout(sides.L); layout(sides.R);
+  // swap label slots to remove leader-line crossings
+  function cross(a, b, c, d) {
+    const o = (p, q, r) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x));
+    return o(a, b, c) !== o(a, b, d) && o(c, d, a) !== o(c, d, b);
+  }
+  [['L', 80 + 400], ['R', W - 80 - 400]].forEach(([k, lx]) => {
+    const list = sides[k];
+    for (let it = 0; it < 200; it++) {
+      let changed = false;
+      for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+        const A = list[i], B = list[j];
+        if (cross({ x: lx, y: A.ly }, { x: A.sx, y: A.sy }, { x: lx, y: B.ly }, { x: B.sx, y: B.sy })) {
+          const t = A.ly; A.ly = B.ly; B.ly = t; changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+  });
+  const LX0 = 80, RX0 = W - 80;
+  let n = 0;
+  const all = [...sides.L.map(p => ({ ...p, side: 'L' })), ...sides.R.map(p => ({ ...p, side: 'R' }))];
+  all.forEach(p => {
+    const lx = p.side === 'L' ? LX0 + 400 : RX0 - 400;
+    const g = document.createElementNS(svgNS, 'g');
+    const elbow = p.side === 'L' ? lx + 26 : lx - 26;
+    const path = document.createElementNS(svgNS, 'polyline');
+    path.setAttribute('points', `${lx},${p.ly} ${elbow},${p.ly} ${p.sx},${p.sy}`);
+    path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#2d6cdf'); path.setAttribute('stroke-width', '2');
+    g.appendChild(path);
+    const dot = document.createElementNS(svgNS, 'circle');
+    dot.setAttribute('cx', p.sx); dot.setAttribute('cy', p.sy); dot.setAttribute('r', 6);
+    dot.setAttribute('fill', '#fff'); dot.setAttribute('stroke', '#2d6cdf'); dot.setAttribute('stroke-width', '3');
+    g.appendChild(dot);
+    const t1 = document.createElementNS(svgNS, 'text');
+    const anchor = p.side === 'L' ? 'end' : 'start';
+    const tx = p.side === 'L' ? lx - 10 : lx + 10;
+    t1.setAttribute('x', tx); t1.setAttribute('y', p.ly - 4); t1.setAttribute('text-anchor', anchor);
+    t1.setAttribute('font-size', '25'); t1.setAttribute('font-weight', '600'); t1.setAttribute('fill', '#15191e');
+    t1.textContent = p.title; g.appendChild(t1);
+    const t2 = document.createElementNS(svgNS, 'text');
+    t2.setAttribute('x', tx); t2.setAttribute('y', p.ly + 24); t2.setAttribute('text-anchor', anchor);
+    t2.setAttribute('font-size', '19'); t2.setAttribute('fill', '#5b6470');
+    t2.textContent = p.sub; g.appendChild(t2);
+    svg.appendChild(g);
+    n++;
+  });
+}
+window.RENDER_DONE = true;
+</script>
+</body>
+</html>
