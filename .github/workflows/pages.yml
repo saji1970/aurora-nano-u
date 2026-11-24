@@ -1,8 +1,13 @@
-# Publishes the showcase site in site/ to GitHub Pages.
-# Run it by hand from the Actions tab once Pages is set to "GitHub Actions"
-# in Settings > Pages. Add a `push` trigger later if every merge should publish.
+# Publishes the showcase site in site/ to GitHub Pages whenever it changes on
+# main, or by hand from the Actions tab. Needs Settings > Pages > Source set to
+# "GitHub Actions" once.
 name: Deploy showcase site
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
   contents: read

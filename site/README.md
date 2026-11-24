@@ -15,8 +15,10 @@ The folder is self-contained (about 8 MB including the two videos), so any
 static host works.
 
 - **GitHub Pages:** in the repository's Settings > Pages, set the source to
-  "GitHub Actions", then run the *Deploy showcase site* workflow from the
-  Actions tab (`.github/workflows/pages.yml`).
+  "GitHub Actions" once. After that, every change to `site/` merged into
+  `main` publishes automatically (`.github/workflows/pages.yml`), and the
+  workflow can also be run by hand from the Actions tab. The site lives at
+  https://saji1970.github.io/aurora-nano-u/.
 - **Netlify or Cloudflare Pages:** drag the `site` folder onto the dashboard,
   or connect the repository with the publish directory set to `site` and no
   build command.
