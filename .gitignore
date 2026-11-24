@@ -4,3 +4,9 @@ tb/sim_gl
 tb/tests.hex
 tb/sg13g2_cells_functional.v
 syn/*.lib
+node_modules/
+scripts/glasses_render/out-*.png
+scripts/glasses_render/frames/
+scripts/glasses_render/*.obj
+bust-*.bin
+scripts/glasses_render/stills/
