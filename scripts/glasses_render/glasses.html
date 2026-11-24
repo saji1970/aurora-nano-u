@@ -229,7 +229,9 @@ if (PAL.clear) {
 M.frameInner.color.set(PAL.inner); M.antennaWin.color.set(PAL.inner);
 if (PAL.touch) M.touch.color.set(PAL.touch);
 // lens tints, as the colour of the glass (transmission multiplies by it)
-const LENSES = { clear: 0xffffff, sun: 0x3a3732, amber: 0xe3a865, blue: 0x6f92c8, rose: 0xe2a6ac };
+const METALS = { gold: 0xe6c27a, silver: 0xd9dce1, gunmetal: 0x5b5e64 };
+M.rim = new THREE.MeshPhysicalMaterial({ color: METALS[params.get('metal')] || METALS.gold, metalness: 1, roughness: 0.16 });
+const LENSES = { g15: 0x5a6650, clear: 0xffffff, sun: 0x3a3732, amber: 0xe3a865, blue: 0x6f92c8, rose: 0xe2a6ac };
 M.lens.color.set(LENSES[LENS] || LENSES.clear);
 
 
@@ -248,7 +250,10 @@ function lensPts(cx, cy, a, b, n = 3.4, nb = 2.5, N = 120) {
     const t = (i / N) * Math.PI * 2;
     const c = Math.cos(t), s = Math.sin(t);
     const e = s < 0 ? nb : n;
-    pts.push(new THREE.Vector2(cx + a * Math.sign(c) * Math.pow(Math.abs(c), 2 / e), cy + b * Math.sign(s) * Math.pow(Math.abs(s), 2 / e)));
+    const x = a * Math.sign(c) * Math.pow(Math.abs(c), 2 / e);
+    let y = b * Math.sign(s) * Math.pow(Math.abs(s), 2 / e);
+    if (STY.warp && cx !== 0) y = WARPS[STY.warp](x * Math.sign(cx), y, a, b);   // u > 0 is towards the temple
+    pts.push(new THREE.Vector2(cx + x, cy + y));
   }
   return pts;
 }
@@ -276,8 +281,21 @@ const STYLES = {
   square: { LX: 34, LA: 25, LB: 19, n: 3.4, nb: 2.5, rim: 4 },
   round:  { LX: 31.5, LA: 21, LB: 20, n: 2.05, nb: 2.05, rim: 3.4 },
   panto:  { LX: 33, LA: 23.5, LB: 19.5, n: 3.0, nb: 1.9, rim: 3.6 },
+  rectangular: { LX: 34, LA: 26, LB: 15, n: 7, nb: 7, rim: 3.4 },
+  aviator: { LX: 35, LA: 26, LB: 22, n: 3.2, nb: 1.9, rim: 1.8, metal: true, dbl: true, warp: 'aviator' },
+  cateye:  { LX: 33.5, LA: 24.5, LB: 18, n: 3.0, nb: 2.1, rim: 4.4, warp: 'cateye' },
+  browline: { LX: 33.5, LA: 24, LB: 18.5, n: 3.2, nb: 2.2, rim: 1.6, metal: true, brow: true },
+  oversized: { LX: 36, LA: 28.5, LB: 24, n: 2.8, nb: 2.3, rim: 4.4 },
+  sport:   { LX: 34, LA: 27, LB: 17, n: 3.2, nb: 2.2, rim: 3.2, warp: 'sport', wrap: 0.16 },
+};
+// shape tweaks: (u across the lens, + towards the temple; v up) -> new v
+const WARPS = {
+  aviator: (u, v, a) => v < 0 ? v * (1.2 - 0.34 * u / a) : v * 0.9,                         // teardrop: deeper on the nose side
+  cateye: (u, v, a) => v > 0 ? v + 8 * Math.pow(Math.max(0, u / a), 3.5) : v * (1 - 0.22 * Math.max(0, u / a)),  // upswept outer corner
+  sport: (u, v, a) => v * (1 - 0.28 * Math.max(0, u / a)) + 2.5 * Math.max(0, u / a),        // swept back towards the temple
 };
 const STY = STYLES[STYLE] || STYLES.square;
+const RINGED = STYLE !== 'square' && !!STYLES[STYLE];
 const LX = STY.LX, LA = STY.LA, LB = STY.LB;
 const RIM = STY.rim;
 const TOP = LB + RIM;                 // 23
@@ -302,37 +320,65 @@ function frontShape() {
   [-LX, LX].forEach(cx => shape.holes.push(new THREE.Path(lensPts(cx, 0, LA, LB, STY.n, STY.nb).reverse())));
   return shape;
 }
+function pivotAt(obj, cx, s) {
+  // turn a lens or rim about its own centre so the outer edge sweeps back (sport wrap)
+  if (!STY.wrap) return obj;
+  const p = new THREE.Group(); p.position.x = cx; obj.position.x -= cx; p.add(obj); p.rotation.y = s * STY.wrap; return p;
+}
+function ringGeo(cx, ao, bo, ai, bi, depth, bev) {
+  const shape = new THREE.Shape(lensPts(cx, 0, ao, bo, STY.n, STY.nb, 180));
+  shape.holes.push(new THREE.Path(lensPts(cx, 0, ai, bi, STY.n, STY.nb, 180).reverse()));
+  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: bev * 0.9, bevelSegments: 8, curveSegments: 96 });
+  geo.translate(0, 0, -depth / 2);
+  return geo;
+}
 function buildRings(g) {
-  // each lens gets its own rim, joined by a keyhole bridge and tabs out to the hinge blocks
+  // each lens gets its own rim, joined by a bridge and tabs out to the hinge blocks
+  const rimMat = STY.metal ? M.rim : M.frame;
   [-1, 1].forEach(s => {
     const cx = s * LX;
-    const shape = new THREE.Shape(lensPts(cx, 0, LA + RIM, LB + RIM, STY.n, STY.nb, 160));
-    shape.holes.push(new THREE.Path(lensPts(cx, 0, LA, LB, STY.n, STY.nb, 160).reverse()));
-    const geo = new THREE.ExtrudeGeometry(shape, { depth: 3.6, bevelEnabled: true, bevelThickness: 1.2, bevelSize: 1.1, bevelSegments: 8, curveSegments: 96 });
-    geo.translate(0, 0, -1.8);
-    g.add(shadowy(new THREE.Mesh(geo, M.frame)));
+    const rim = STY.metal ? ringGeo(cx, LA + RIM, LB + RIM, LA, LB, 1.4, 0.55) : ringGeo(cx, LA + RIM, LB + RIM, LA, LB, 3.6, 1.2);
+    g.add(pivotAt(shadowy(new THREE.Mesh(rim, rimMat)), cx, s));
+    if (STY.brow) {
+      // acetate brow over the top of a thin metal rim
+      const yc = 2;
+      const out = lensPts(cx, 0, LA + 5.2, LB + 5.2, STY.n, STY.nb, 180).filter(p => p.y > yc);
+      const inn = lensPts(cx, 0, LA + 0.6, LB + 0.6, STY.n, STY.nb, 180).filter(p => p.y > yc + 3);
+      out.sort((p, q) => s * (q.x - p.x)); inn.sort((p, q) => s * (p.x - q.x));
+      const geo = new THREE.ExtrudeGeometry(new THREE.Shape([...out, ...inn]), { depth: 4, bevelEnabled: true, bevelThickness: 1.2, bevelSize: 1.0, bevelSegments: 8, curveSegments: 64 });
+      geo.translate(0, 0, -1.2);
+      g.add(shadowy(new THREE.Mesh(geo, M.frame)));
+    }
     // tab from the rim to the hinge block
     const x0 = cx + s * (LA + RIM - 4), x1 = s * 68;
-    const tab = rbox(Math.abs(x1 - x0), 10.5, 5.2, 2.2, M.frame);
-    tab.position.set((x0 + x1) / 2, 14.5, -0.4);
+    const thin = STY.metal && !STY.brow;
+    const tab = thin ? rbox(Math.abs(x1 - x0), 5, 2.6, 1.2, M.rim) : rbox(Math.abs(x1 - x0), 10.5, 5.2, 2.2, STY.brow ? M.frame : M.frame);
+    tab.position.set((x0 + x1) / 2, thin ? 15 : 14.5, -0.4);
     g.add(tab);
   });
   const bx = LX - LA - 1.2;
+  const bmat = STY.metal ? M.rim : M.frame, br_r = STY.metal ? 1.1 : 2.3;
   const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(-bx - 1.5, 9.5, 0), new THREE.Vector3(-bx * 0.5, 12.2, 0.4), new THREE.Vector3(0, 12.8, 0.6),
     new THREE.Vector3(bx * 0.5, 12.2, 0.4), new THREE.Vector3(bx + 1.5, 9.5, 0)]);
-  const br = shadowy(new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 2.3, 24, false), M.frame));
+  const br = shadowy(new THREE.Mesh(new THREE.TubeGeometry(curve, 48, br_r, 24, false), bmat));
   br.scale.z = 1.25; g.add(br);
+  if (STY.dbl) {
+    // aviator top bar
+    const xt = LX - LA * 0.45, yt = LB * 0.92 + 1;
+    const top = new THREE.CatmullRomCurve3([new THREE.Vector3(-xt, yt, 0), new THREE.Vector3(0, yt + 0.8, 0.4), new THREE.Vector3(xt, yt, 0)]);
+    g.add(shadowy(new THREE.Mesh(new THREE.TubeGeometry(top, 48, 1.0, 16, false), M.rim)));
+  }
 }
 function buildFrontFrame() {
   const g = new THREE.Group();
-  if (STYLE === 'square' || !STYLES[STYLE]) {
+  if (!RINGED) {
     const geo = new THREE.ExtrudeGeometry(frontShape(), { depth: 4.2, bevelEnabled: true, bevelThickness: 1.1, bevelSize: 1.0, bevelSegments: 8, curveSegments: 96 });
     geo.translate(0, 0, -2.1);
     g.add(shadowy(new THREE.Mesh(geo, M.frame)));
   } else buildRings(g);
   // end pieces / hinge blocks
   [-1, 1].forEach(s => {
-    const ringed = STYLE !== 'square' && STYLES[STYLE];
+    const ringed = RINGED;
     const e = ringed ? rbox(8.5, 13.5, 14, 3.2, M.arm) : rbox(9.5, 17.5, 16, 2.6, M.arm);
     e.position.set(s * 71, ringed ? 14.2 : 13.8, ringed ? -7.2 : -6.5);
     g.add(e);
@@ -354,7 +400,7 @@ function buildLens(cx) {
   geo.translate(0, 0, -0.7);
   const m = new THREE.Mesh(geo, M.lens);
   m.castShadow = false; m.receiveShadow = false;
-  const g = new THREE.Group(); g.add(m);
+  const g = new THREE.Group(); g.add(pivotAt(m, cx, Math.sign(cx)));
   // in-coupling grating near the outer edge
   const s = Math.sign(cx);
   const grating = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 7), new THREE.MeshPhysicalMaterial({ color: 0x8fa6c4, roughness: 0.15, metalness: 0.6, iridescence: 1, iridescenceThicknessRange: [200, 700], transparent: true, opacity: 0.55 }));
@@ -550,7 +596,7 @@ if (EXPLODED) addLabel(front, 'Front frame', 'acetate-over-metal, end pieces hol
   ], 3.2, M.flex);
   ff.position.set(0, ex(62), ex(-6));
   // on the rimmed styles the flex runs hidden inside the brow, so only show it when exploded
-  if (STYLE === 'square' || EXPLODED) root.add(ff);
+  if (!RINGED || EXPLODED) root.add(ff);
   if (EXPLODED) addLabel(ff, 'Frame flex', 'display, camera and board-to-board link', new THREE.Vector3(22, 20.5, -3.4));
 }
 
@@ -731,6 +777,11 @@ if (MODE === 'exploded') {
   camera.position.set(-14 - 526 * 1.1, 12 + 398 * 1.1, -70 + 540 * 1.1);
   camera.lookAt(-14, 12, -70);
   camera.setViewOffset(W, H, -80, -30, W, H);
+} else if (params.get('cam') === 'gallery') {
+  // a gentle three-quarter that still shows the lens shape
+  camera = new THREE.PerspectiveCamera(16, W / H, 1, 3000);
+  camera.position.set(-230 * 1.35, 95 * 1.35 + 4, 430 * 1.35 - 54);
+  camera.lookAt(0, 0, -40);
 } else if (MODE === 'front') {
   camera = new THREE.PerspectiveCamera(15, W / H, 1, 3000);
   camera.position.set(-30, 60, 520);

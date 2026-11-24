@@ -7,8 +7,12 @@ pick what it draws:
 | Parameter | Values |
 | --- | --- |
 | `mode` | `assembled`, `exploded`, `front` (labelled doc renders), `worn` (on a sculpted bust), `anim` (animation, driven by `anim.js`) |
-| `color` | `obsidian`, `glacier`, `havana`, `midnight`, `sage`, `blush` |
-| `lens` | `clear`, `sun`, `amber`, `blue`, `rose` |
+| `style` | frame front: `square`, `round`, `panto`, `rectangular`, `aviator`, `cateye`, `browline`, `oversized`, `sport` (shapes are in `STYLES` and `WARPS`) |
+| `color` | `obsidian`, `glacier`, `havana`, `midnight`, `sage`, `blush`, plus translucent `crystal` and `smoke` fronts |
+| `metal` | wire parts on aviator and browline: `gold`, `silver`, `gunmetal` |
+| `lens` | `clear`, `sun`, `g15`, `amber`, `blue`, `rose` (glass with real refraction) |
+| `cam` | `gallery` for the gentle three-quarter used in the style gallery |
+| `env` | `room` for the old neutral lighting; default is the studio soft-box environment |
 | `w`, `h` | image size in pixels (default 2400 × 1500) |
 | `clean` | leave out the title and labels |
 | `bg` | background gradient, up to three hex colours without `#`, e.g. `bg=34363c,1d1f23,0d0e10` |
