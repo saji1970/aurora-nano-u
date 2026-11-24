@@ -9,7 +9,9 @@ Design documents: [Aurora-1 GPU architecture](docs/aurora-1-architecture.md) (th
 comes from) and [Aurora-Nano for glasses](docs/aurora-nano-glasses.md) (the 2 × 2 mm language-model
 chip this package scales down). The [glasses main board](docs/glasses-board.md) shows the
 Android SoC, memory, displays, 5G and power around it, and the
-[packaging plan](docs/glasses-packaging.md) shows how it fits in the frame.
+[packaging plan](docs/glasses-packaging.md) shows how it fits in the frame. The [cost and sourcing estimate](docs/glasses-cost-and-sourcing.md)
+covers development cost, unit cost, suppliers and manufacturers. The [funding requirement](docs/glasses-funding-requirement.md)
+turns it into a staged investment ask.
 
 ## What the chip does
 
