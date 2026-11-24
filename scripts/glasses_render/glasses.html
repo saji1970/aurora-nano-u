@@ -193,6 +193,7 @@ const M = {
   antenna: new THREE.MeshPhysicalMaterial({ map: antennaTex, roughness: 0.4, metalness: 0.5 }),
   black: new THREE.MeshPhysicalMaterial({ color: 0x18181b, roughness: 0.5 }),
   ceramic: new THREE.MeshPhysicalMaterial({ color: 0x9a7b55, roughness: 0.5 }),
+  led: new THREE.MeshPhysicalMaterial({ color: 0xffffff, emissive: 0xfff4e0, emissiveIntensity: params.has('ledoff') ? 0 : 2.2, roughness: 0.3, transmission: 0.2 }),
 };
 
 // ---------- colour variants ----------
@@ -527,12 +528,26 @@ function buildProjector() {
   const fpc = box(5, 3, 0.15, M.flex); fpc.position.set(6.5, 0, 0); g.add(fpc);
   return g;
 }
-function buildCamera() {
+// kind 'rgb': 12 MP photo/video camera with its privacy LED; 'track': small global-shutter mono tracking camera.
+// inward = +1 when the frame centre is toward +x from this corner.
+function buildCamera(kind = 'rgb', inward = 1) {
   const g = new THREE.Group();
-  const body = rbox(6, 6, 4.5, 0.6, M.black); g.add(body);
-  const barrel = cyl(2.2, 1.8, M.darkMetal, 40); barrel.rotation.x = Math.PI / 2; barrel.position.z = 2.8; g.add(barrel);
-  const glass = cyl(1.6, 0.3, M.glassDark, 40); glass.rotation.x = Math.PI / 2; glass.position.z = 3.75; g.add(glass);
-  const fpc = box(3, 6, 0.15, M.flex); fpc.position.set(0, -5.5, -2); g.add(fpc);
+  if (kind === 'rgb') {
+    const body = rbox(7, 7, 5, 0.7, M.black); g.add(body);
+    const barrel = cyl(2.6, 2.0, M.darkMetal, 48); barrel.rotation.x = Math.PI / 2; barrel.position.z = 3.2; g.add(barrel);
+    const glass = cyl(1.95, 0.3, M.glassDark, 48); glass.rotation.x = Math.PI / 2; glass.position.z = 4.25; g.add(glass);
+    // privacy LED on a small flex tab beside the lens: white diffuser that glows while the camera is powered
+    const tab = box(3.4, 3.4, 0.3, M.flex); tab.position.set(inward * 5.4, 0, 1.6); g.add(tab);
+    const led = cyl(0.95, 2.6, M.led, 32); led.rotation.x = Math.PI / 2; led.position.set(inward * 5.4, 0, 3.3); g.add(led);
+    const bezel = cyl(1.35, 0.35, M.darkMetal, 32); bezel.rotation.x = Math.PI / 2; bezel.position.set(inward * 5.4, 0, 4.35); g.add(bezel);
+    const fpc = box(3.6, 7, 0.15, M.flex); fpc.position.set(0, -6.2, -2.2); g.add(fpc);
+    g.userData.led = led;
+  } else {
+    const body = rbox(5, 5, 4, 0.5, M.black); g.add(body);
+    const barrel = cyl(1.7, 1.6, M.darkMetal, 40); barrel.rotation.x = Math.PI / 2; barrel.position.z = 2.6; g.add(barrel);
+    const glass = cyl(1.35, 0.3, M.glassDark, 40); glass.rotation.x = Math.PI / 2; glass.position.z = 3.45; g.add(glass);
+    const fpc = box(2.4, 6, 0.15, M.flex); fpc.position.set(0, -5.2, -1.8); g.add(fpc);
+  }
   return g;
 }
 function ribbon(points, width, mat) {
@@ -570,13 +585,17 @@ if (EXPLODED) addLabel(front, 'Front frame', 'acetate-over-metal, end pieces hol
   if (EXPLODED && s > 0) addLabel(lens, 'In-coupling grating', 'where projector light enters the waveguide', new THREE.Vector3(LX + LA - 4, 6, 1));
 });
 
-// Cameras in front corners
+// Cameras in front corners: 12 MP RGB camera + privacy LED on the right (main-board side), tracking camera on the left
 [-1, 1].forEach(s => {
-  const cam = buildCamera();
+  const cam = buildCamera(s < 0 ? 'rgb' : 'track', -s);
   cam.position.set(s * 63.5, 17, 0.4 + ex(s < 0 ? 90 : 30));
   cam.position.y += ex(14);
   root.add(cam);
-  if (EXPLODED && s < 0) addLabel(cam, 'Camera module', '5–7 mm, one in each front corner', new THREE.Vector3(0, 0, 3.5));
+  if (EXPLODED && s < 0) {
+    addLabel(cam, 'RGB camera, 12 MP', 'photo, video and AI vision; MIPI CSI-2 to the SoC', new THREE.Vector3(0, 0, 4.2));
+    addLabel(cam, 'Privacy LED', 'lit by the camera power rail, so it cannot be hidden', cam.userData.led.position.clone().add(new THREE.Vector3(0, 0, 1.3)));
+  }
+  if (EXPLODED && s > 0) addLabel(cam, 'Tracking camera', 'global-shutter mono, hands and head tracking', new THREE.Vector3(0, 0, 3.4));
 });
 
 // Projectors at hinges
@@ -777,6 +796,10 @@ if (MODE === 'exploded') {
   camera.position.set(-14 - 526 * 1.1, 12 + 398 * 1.1, -70 + 540 * 1.1);
   camera.lookAt(-14, 12, -70);
   camera.setViewOffset(W, H, -80, -30, W, H);
+} else if (params.get('cam') === 'corner') {
+  // close-up of the right front corner: RGB camera and privacy LED
+  camera = new THREE.PerspectiveCamera(18, W / H, 1, 3000);
+  aim(camera, [-50, 10, -4], [-0.42, 0.16, 1], 230);
 } else if (params.get('cam') === 'gallery') {
   // a gentle three-quarter that still shows the lens shape
   camera = new THREE.PerspectiveCamera(16, W / H, 1, 3000);
@@ -838,7 +861,7 @@ const title = document.getElementById('title');
 const titles = {
   exploded: ['Aurora smart glasses: exploded view', 'Each part pulled out along the direction it is assembled'],
   assembled: ['Aurora smart glasses', 'Assembled: about 65–85 g, both arms carry electronics'],
-  front: ['Aurora smart glasses', 'Front view: cameras in the corners, waveguide displays in the lenses'],
+  front: ['Aurora smart glasses', 'Front view: 12 MP camera and privacy LED on the wearer\'s right, tracking camera on the left'],
 };
 if (!CLEAN) {
 title.innerHTML = `<h1>${titles[MODE][0]}</h1><p>${titles[MODE][1]}</p>`;

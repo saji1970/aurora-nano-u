@@ -2,7 +2,7 @@
 
 A single static page that tells the Aurora glasses story: the concept, the six
 colour finishes, the glasses on sculpted busts, an exploded-view film, the
-design (block diagram and packaging), the roadmap, the cost estimate and the
+design (block diagram and packaging), the camera, Android and the launch apps, the roadmap, the cost estimate and the
 funding requirement. No build step: open `index.html` or serve the folder.
 
 ```sh
@@ -29,6 +29,8 @@ static host works.
 | Part of the page | Source |
 | --- | --- |
 | Specs, packaging, block diagram | `docs/glasses-board.md`, `docs/glasses-packaging.md` |
+| Camera section | `docs/glasses-camera.md` |
+| Android and apps section | `docs/glasses-software-platform.md` |
 | Cost tiles and bill of materials | `docs/glasses-cost-and-sourcing.md` |
 | Funding stages, use of funds, unit economics, lean path, risks | `docs/glasses-funding-requirement.md` |
 | Colour, on-model and hero images, both videos | rendered by `scripts/glasses_render/` (see its README) |

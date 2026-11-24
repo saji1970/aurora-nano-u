@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aurora Smart Glasses</title>
-<meta name="description" content="Aurora: standalone Android display glasses. The concept, the design, the colours and the funding plan from proof of concept to the first 5,000 units.">
+<meta name="description" content="Aurora: standalone Android display glasses. The concept, the design, the camera, the apps and the funding plan from proof of concept to the first 5,000 units.">
 <meta property="og:title" content="Aurora Smart Glasses">
-<meta property="og:description" content="Android apps on a full-colour microLED display in each lens. From concept to design to a $16.25M funding plan.">
+<meta property="og:description" content="Android apps on a full-colour microLED display in each lens. A 12 MP camera with a hardware privacy LED, an Android app platform, and a $17.7M funding plan.">
 <meta property="og:image" content="assets/img/og.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='20' width='24' height='20' rx='7' fill='none' stroke='%23e8a23a' stroke-width='5'/%3E%3Crect x='36' y='20' width='24' height='20' rx='7' fill='none' stroke='%23e8a23a' stroke-width='5'/%3E%3Cpath d='M28 27h8' stroke='%23e8a23a' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -244,6 +244,26 @@ table.plain tr.total td { font-weight: 600; border-bottom: 0; }
 footer { padding: 40px 0 56px; font-size: 13px; color: var(--ink-3); background: var(--bg); }
 footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 
+/* camera + apps */
+.camera-sec { background: var(--bg-2); }
+.camera-sec .tiles { margin-top: 56px; }
+.adapt { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 48px; }
+.adapt > div { border-top: 2px solid var(--accent); padding-top: 18px; }
+.adapt b { font: 600 19px "Inter Tight", sans-serif; display: block; margin-bottom: 8px; }
+.adapt p { color: var(--ink-2); font-size: 15px; }
+.tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 48px; }
+.tier { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+.tier .n { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--bg-2); color: var(--accent-ink); font-weight: 600; font-size: 14px; margin-bottom: 14px; }
+.tier p { color: var(--ink-2); font-size: 15px; margin-top: 8px; }
+.applist { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+.app { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+.app i { font-style: normal; width: 36px; height: 36px; border-radius: 10px; background: var(--bg-2); color: var(--accent-ink); display: grid; place-items: center; font-size: 17px; margin-bottom: 6px; }
+.app b { font-size: 15px; }
+.app span { font-size: 13px; color: var(--ink-3); line-height: 1.45; }
+.apps-sec table.plain td:first-child { padding-right: 16px; }
+@media (max-width: 980px) { .applist { grid-template-columns: repeat(3, minmax(0, 1fr)); } .adapt, .tiers { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .applist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* tooltip */
 .tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 13px; padding: 8px 11px; border-radius: 8px; opacity: 0; transition: opacity .12s; max-width: 260px; }
 .tip.on { opacity: 1; }
@@ -272,6 +292,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       <a href="#styles">Styles</a>
       <a href="#on-model">On model</a>
       <a href="#design">Design</a>
+      <a href="#camera">Camera</a>
+      <a href="#apps">Apps</a>
       <a href="#journey">Roadmap</a>
       <a href="#funding">Funding</a>
     </div>
@@ -288,7 +310,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
   <div class="wrap">
     <div class="eyebrow" style="color:#e8a23a">Standalone display glasses</div>
     <h1>Aurora</h1>
-    <p>Your Android apps, on a full-colour display in each lens. Its own processor, its own 5G, and room to grow into on-device AI.</p>
+    <p>Your Android apps, on a full-colour display in each lens. A camera that sees what you see, its own processor, its own 5G, and room to grow into on-device AI.</p>
     <div class="cta">
       <a class="btn primary" href="#funding">See the funding plan</a>
       <a class="btn ghost" href="#film">Watch it come apart</a>
@@ -297,7 +319,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       <div><b>2 × microLED</b><span>full-colour waveguide displays</span></div>
       <div><b>16 GB</b><span>memory on an XR2 Gen 2-class SoC</span></div>
       <div><b>65–85 g</b><span>target weight, electronics in both arms</span></div>
-      <div><b>$16.25M</b><span>to ship the first 5,000 units</span></div>
+      <div><b>$17.7M</b><span>to ship the first 5,000 units</span></div>
     </div>
   </div>
 </header>
@@ -415,6 +437,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
           <li><b>Left arm:</b> radio board with the 5G modem, Wi-Fi 7, Bluetooth, charger and audio</li>
           <li><b>Behind each ear:</b> a 46 × 10 × 6 mm cell, about 1.3 Wh each</li>
           <li><b>At each hinge:</b> a 6 × 6 × 10 mm microLED projector</li>
+          <li><b>Front corners:</b> a 12 MP camera and privacy LED on the right, a tracking camera on the left</li>
         </ul>
       </div>
     </div>
@@ -442,7 +465,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       <div><dt>Display</dt><dd>2 × full-colour microLED, waveguide lenses</dd></div>
       <div><dt>Connectivity</dt><dd>5G sub-6 GHz · Wi-Fi 7 · Bluetooth 5.4</dd></div>
       <div><dt>Input</dt><dd>Capacitive touchpad on the right arm</dd></div>
-      <div><dt>Cameras</dt><dd>One in each front corner</dd></div>
+      <div><dt>Cameras</dt><dd>12 MP RGB + privacy LED · tracking camera</dd></div>
+      <div><dt>Software</dt><dd>Android (AOSP) · Aurora Store · 10 launch apps</dd></div>
       <div><dt>Battery</dt><dd>About 2.7 Wh across two cells</dd></div>
       <div><dt>Weight</dt><dd>About 65–85 g (target to bring down)</dd></div>
       <div><dt>Charging</dt><dd>Pogo pins into a charging case</dd></div>
@@ -451,10 +475,96 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
   </div>
 </section>
 
+<!-- CAMERA -->
+<section class="camera-sec" id="camera">
+  <div class="wrap reveal">
+    <div class="eyebrow">06 · Camera</div>
+    <h2>It sees what you see.<br>And everyone knows it.</h2>
+    <p class="lede">A 12 MP camera sits in the right front corner, right next to the main board, for photos, short videos and questions about whatever you're looking at. A small mono camera in the left corner tracks your hands. A privacy LED beside the main lens is powered by the camera itself, so it is lit whenever the camera is on.</p>
+    <div class="split">
+      <figure class="zoomable"><img src="assets/img/camera.jpg" alt="Close-up of the right front corner of the glasses showing the camera lens and the lit privacy LED beside it" loading="lazy"></figure>
+      <div>
+        <h3>Two cameras, one rule</h3>
+        <ul>
+          <li><b>12 MP RGB camera:</b> stacked sensor and a fixed-focus wide lens, about 7 × 7 × 5 mm, on a 4-lane MIPI CSI-2 link to the processor's image signal processor</li>
+          <li><b>Tracking camera:</b> 1 MP global-shutter mono sensor for pinch, point and swipe gestures, and stereo depth paired with the RGB camera</li>
+          <li><b>Privacy LED:</b> shares the camera's power rail. If the camera has power, the light is on. A light sensor stops capture if someone covers it.</li>
+          <li><b>Within the heat budget:</b> photos and AI questions are on demand, and video comes in clips of up to 3 minutes, so the arm never has to shed more than it can</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="label">Main camera</div><div class="value">12 MP</div><div class="sub">photo, 1080p video, AI vision</div></div>
+      <div class="tile"><div class="label">Added weight</div><div class="value">2–3 g</div><div class="sub">replaces the placeholder modules</div></div>
+      <div class="tile"><div class="label">Video recording</div><div class="value">0.9–1.5 W</div><div class="sub">so video is clip-based</div></div>
+      <div class="tile"><div class="label">Cost at volume</div><div class="value">$14–22</div><div class="sub">both cameras, LED and flex</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- APPS -->
+<section class="apps-sec" id="apps">
+  <div class="wrap reveal">
+    <div class="eyebrow">07 · Android and apps</div>
+    <h2>Android, redesigned<br>for a see-through display.</h2>
+    <p class="lede">Aurora runs Android (AOSP) on Qualcomm's board support package, with its own launcher, store and apps. That needs no one's permission. In parallel we apply to Google's Android XR programme, which would add Google Play, Gemini and Maps on the same hardware.</p>
+
+    <div class="adapt">
+      <div><b>Black is see-through</b><p>The projectors only add light, so the system theme is bright text on black, and screens are glanceable cards that fade after a few seconds.</p></div>
+      <div><b>A touchpad, not a touchscreen</b><p>Swipes on the arm move focus and taps select, using the same focus navigation as Android TV, so many existing apps already work. Voice, hand tracking and your phone as a trackpad fill the gaps.</p></div>
+      <div><b>Power first</b><p>Low default CPU and GPU budgets, aggressive freezing of background apps, and 5G only when no phone or Wi-Fi is nearby.</p></div>
+    </div>
+
+    <div class="tiers">
+      <div class="tier"><span class="n">1</span><h3>Glasses-native apps</h3><p>Built with the Aurora SDK on Jetpack Compose: card and list components, touchpad and voice input, and camera and AI-assistant APIs.</p></div>
+      <div class="tier"><span class="n">2</span><h3>Ordinary Android apps</h3><p>Unmodified phone apps in a floating window. We test the top 200 and list the ones that work well.</p></div>
+      <div class="tier"><span class="n">3</span><h3>Phone-driven apps</h3><p>Apps stay on the phone and send cards, notifications or a mirrored screen, which saves battery and heat on the glasses.</p></div>
+    </div>
+
+    <h3 style="margin-top:64px">Ten apps on day one</h3>
+    <div class="applist">
+      <div class="app"><i>◉</i><b>Camera</b><span>Point-of-view photos and 3-minute clips, synced to your phone</span></div>
+      <div class="app"><i>✦</i><b>Aurora Assistant</b><span>Ask about what you see: plants, signs, where you parked</span></div>
+      <div class="app"><i>❝</i><b>Live captions</b><span>Subtitles for the people around you, translated if needed</span></div>
+      <div class="app"><i>➜</i><b>Navigation</b><span>Walking and cycling arrows in view, on licensed maps</span></div>
+      <div class="app"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></i><b>Notifications</b><span>Glanceable cards from your phone, with voice replies</span></div>
+      <div class="app"><i>☏</i><b>Calls and video calls</b><span>Show the other person what you see</span></div>
+      <div class="app"><i>♪</i><b>Music and podcasts</b><span>Open-ear audio with touchpad controls</span></div>
+      <div class="app"><i>≡</i><b>Teleprompter and notes</b><span>Speaker notes in view, quick voice notes</span></div>
+      <div class="app"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></i><b>Visual description</b><span>Reads text and describes scenes aloud for low-vision users</span></div>
+      <div class="app"><i>⚒</i><b>Remote assist</b><span>An expert sees your view and marks it up, hands-free</span></div>
+    </div>
+
+    <div class="two" style="margin-top:40px">
+      <div class="card">
+        <h3>Getting apps</h3>
+        <p class="cap">The Aurora Store lives in the companion phone app.</p>
+        <table class="plain">
+          <tr><td><b>At launch</b></td><td>Curated Aurora Store, a "works well on Aurora" list of ordinary Android apps, developer sideloading, and Android Enterprise for businesses</td></tr>
+          <tr><td><b>With Android XR</b></td><td>Google Play takes over most of the catalogue; the Aurora Store stays for glasses-specific and business apps</td></tr>
+          <tr><td><b>Developers</b></td><td>SDK and developer console public 6 months before launch, with a $100k fund to port the first 10–15 apps</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>What the software adds</h3>
+        <p class="cap">On top of the Android team already in the plan.</p>
+        <table class="plain">
+          <tr><td>Two more engineers (camera, developer platform)</td><td class="num">$510k</td></tr>
+          <tr><td>Aurora Store, developer console and SDK</td><td class="num">$300k</td></tr>
+          <tr><td>Launch-app licences and developer fund</td><td class="num">$250k</td></tr>
+          <tr><td>Camera tuning and test fixtures</td><td class="num">$200k</td></tr>
+          <tr><td>Dev kits, Android XR engagement</td><td class="num">$50k</td></tr>
+          <tr class="total"><td>With unit cost and contingency</td><td class="num">+$1.45M</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- JOURNEY -->
 <section class="journey" id="journey">
   <div class="wrap reveal">
-    <div class="eyebrow">06 · Roadmap</div>
+    <div class="eyebrow">08 · Roadmap</div>
     <h2>Concept to first 5,000 units<br>in about 30 months.</h2>
     <p class="lede">Each stage retires one big risk before the next stage is funded.</p>
     <div class="timeline">
@@ -469,12 +579,12 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
 <!-- COST -->
 <section id="cost">
   <div class="wrap reveal">
-    <div class="eyebrow">07 · What it costs to make</div>
+    <div class="eyebrow">09 · What it costs to make</div>
     <h2>The display is half the bill.</h2>
     <p class="lede">Planning estimates from typical industry rates and teardowns of similar glasses. Every number is to be replaced by a supplier quote before it is relied on.</p>
     <div class="tiles">
-      <div class="tile"><div class="label">One-time development</div><div class="value">$3.5–10M</div><div class="sub">engineering, prototypes, tooling, certification</div></div>
-      <div class="tile"><div class="label">Unit cost at volume</div><div class="value">$500–850</div><div class="sub">10k–100k units a year</div></div>
+      <div class="tile"><div class="label">One-time development</div><div class="value">$4–11.2M</div><div class="sub">engineering, software, prototypes, tooling, certification</div></div>
+      <div class="tile"><div class="label">Unit cost at volume</div><div class="value">$505–855</div><div class="sub">10k–100k units a year</div></div>
       <div class="tile"><div class="label">Unit cost, prototypes</div><div class="value">$2.0–4.5k</div><div class="sub">10–100 unit builds</div></div>
       <div class="tile"><div class="label">Gross margin, direct</div><div class="value">49%</div><div class="sub">at $1,499 retail, volume cost</div></div>
     </div>
@@ -490,13 +600,13 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
 <!-- FUNDING -->
 <section class="funding" id="funding" style="padding-top:40px">
   <div class="wrap reveal">
-    <div class="eyebrow">08 · Funding requirement</div>
-    <h2>$16.25M, in three gated stages.</h2>
-    <p class="lede">Each stage is released only when the stage before hits its milestones, so investors fund the next risk only after the last one is retired. The realistic range is $12–20M depending on quotes, team location and prototype rounds.</p>
+    <div class="eyebrow">10 · Funding requirement</div>
+    <h2>$17.7M, in three gated stages.</h2>
+    <p class="lede">Each stage is released only when the stage before hits its milestones, so investors fund the next risk only after the last one is retired. The realistic range is $13–22M depending on quotes, team location and prototype rounds. Adding the camera and the app platform raised the ask from $16.25M by $1.45M.</p>
 
     <div class="card">
       <h3>The ask by stage</h3>
-      <p class="cap">Share of the $16.25M total.</p>
+      <p class="cap">Share of the $17.7M total.</p>
       <div class="seg" id="segStages"></div>
       <div class="seg-labels" id="segStagesLab"></div>
       <div class="legend">
@@ -524,8 +634,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       </div>
       <div class="stage">
         <div class="top"><i style="background:var(--s2)"></i>Stage 2 · Seed · months 6–15</div>
-        <div class="amt">$3.2M</div>
-        <p class="proves">Proves custom engineering prototypes work end to end and that pilot users want them.</p>
+        <div class="amt">$3.4M</div>
+        <p class="proves">Proves custom engineering prototypes work end to end, the camera is tuned, and pilot users want them.</p>
         <h4>Use of funds</h4>
         <table>
           <tr><td>Team growing from 4 to 12</td><td>$1.53M</td></tr>
@@ -533,6 +643,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
           <tr><td>Two EVT builds, ~50 units each</td><td>$300k</td></tr>
           <tr><td>Display samples, lab and test gear</td><td>$150k</td></tr>
           <tr><td>Pre-compliance radio and SAR</td><td>$60k</td></tr>
+          <tr><td>Camera image-quality tuning</td><td>$150k</td></tr>
+          <tr><td>Dev kits, Android XR engagement</td><td>$50k</td></tr>
           <tr><td>Tools, office, legal, insurance</td><td>$160k</td></tr>
           <tr><td>Contingency</td><td>$300k</td></tr>
         </table>
@@ -541,27 +653,29 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       </div>
       <div class="stage">
         <div class="top"><i style="background:var(--s3)"></i>Stage 3 · Series A · months 15–30</div>
-        <div class="amt">$12.4M</div>
-        <p class="proves">Proves the product certifies, the factory line yields, and the first 5,000 units ship.</p>
+        <div class="amt">$13.65M</div>
+        <p class="proves">Proves the product certifies, the app store and launch apps are live, the factory line yields, and the first 5,000 units ship.</p>
         <h4>Use of funds</h4>
         <table>
-          <tr><td>Team of about 16 for 15 months</td><td>$4.08M</td></tr>
-          <tr><td>First run: 5,000 units at ~$750</td><td>$3.75M</td></tr>
+          <tr><td>Team of about 18 for 15 months</td><td>$4.59M</td></tr>
+          <tr><td>First run: 5,000 units at ~$755</td><td>$3.78M</td></tr>
           <tr><td>ODM DVT/PVT engineering and builds</td><td>$1.05M</td></tr>
           <tr><td>Launch and marketing</td><td>$1.0M</td></tr>
           <tr><td>Certification and reliability testing</td><td>$750k</td></tr>
+          <tr><td>App store, SDK, launch-app licences</td><td>$550k</td></tr>
+          <tr><td>Camera factory test fixtures</td><td>$50k</td></tr>
           <tr><td>Production tooling</td><td>$350k</td></tr>
           <tr><td>Operations, legal, support</td><td>$300k</td></tr>
-          <tr><td>Contingency</td><td>$1.12M</td></tr>
+          <tr><td>Contingency</td><td>$1.23M</td></tr>
         </table>
         <h4>Done when</h4>
-        <ul><li>US and EU certifications granted</li><li>Factory yield above 90% at PVT</li><li>First 5,000 units shipped</li></ul>
+        <ul><li>US and EU certifications granted</li><li>Factory yield above 90% at PVT</li><li>Store and 10 launch apps live; first 5,000 units shipped</li></ul>
       </div>
     </div>
 
     <div class="two">
       <div class="card">
-        <h3>Where the $16.25M goes</h3>
+        <h3>Where the $17.7M goes</h3>
         <p class="cap">Across all three stages, US dollars.</p>
         <div class="hbars" id="uses"></div>
       </div>
@@ -572,28 +686,28 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
         <table class="plain">
           <tr><th></th><th class="num">Direct</th><th class="num">Retail</th></tr>
           <tr><td>Revenue to the company</td><td class="num">$1,454</td><td class="num">~$1,050</td></tr>
-          <tr><td>Parts and assembly</td><td class="num">$650</td><td class="num">$650</td></tr>
+          <tr><td>Parts and assembly</td><td class="num">$655</td><td class="num">$655</td></tr>
           <tr><td>Royalties, freight, warranty</td><td class="num">$85</td><td class="num">$85</td></tr>
-          <tr class="total"><td>Gross profit</td><td class="num">~$720 (49%)</td><td class="num">~$315 (30%)</td></tr>
+          <tr class="total"><td>Gross profit</td><td class="num">~$715 (49%)</td><td class="num">~$310 (30%)</td></tr>
         </table>
         </div>
-        <p class="small muted" style="margin-top:14px">Break-even at about 900 units a month after launch, or 10,000–11,000 a year.</p>
+        <p class="small muted" style="margin-top:14px">Break-even at about 950 units a month after launch, or 11,000–12,000 a year.</p>
       </div>
     </div>
 
     <div class="card">
-      <h3>A leaner path: about $10M</h3>
+      <h3>A leaner path: about $11M</h3>
       <p class="cap">Pair with a phone instead of carrying 5G, use the glasses-specific Snapdragon AR1+, and build on an ODM reference design.</p>
       <div class="scroll-x">
       <table class="plain">
         <tr><th>Stage</th><th class="num">Full plan</th><th class="num">Lean plan</th></tr>
         <tr><td>Pre-seed</td><td class="num">$650k</td><td class="num">$650k</td></tr>
-        <tr><td>Seed</td><td class="num">$3.2M</td><td class="num">~$2.5M</td></tr>
-        <tr><td>Series A</td><td class="num">$12.4M</td><td class="num">~$7M</td></tr>
-        <tr class="total"><td>Total</td><td class="num">~$16.25M</td><td class="num">~$10M</td></tr>
+        <tr><td>Seed</td><td class="num">$3.4M</td><td class="num">~$2.7M</td></tr>
+        <tr><td>Series A</td><td class="num">$13.65M</td><td class="num">~$7.6M</td></tr>
+        <tr class="total"><td>Total</td><td class="num">~$17.7M</td><td class="num">~$11M</td></tr>
       </table>
       </div>
-      <p class="small muted" style="margin-top:14px">Savings come from a smaller team, no cellular certification or royalties, and a cheaper unit (about $450 instead of $750 at first run). The glasses then need a phone nearby when away from Wi-Fi.</p>
+      <p class="small muted" style="margin-top:14px">It keeps the camera and the app platform. Savings come from a smaller team, no cellular certification or royalties, and a cheaper unit (about $455 instead of $755 at first run). The glasses then need a phone nearby when away from Wi-Fi.</p>
     </div>
 
     <div class="risks">
@@ -602,6 +716,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       <div class="risk"><b>Qualcomm access</b><p>Work through an ODM or design house that already holds access; a pre-seed milestone.</p></div>
       <div class="risk"><b>Display supply and cost</b><p>Evaluate two waveguide suppliers early and keep a single-eye or monochrome option.</p></div>
       <div class="risk"><b>Certification</b><p>Pre-compliance scans in the seed stage; 5G carrier approval can follow launch.</p></div>
+      <div class="risk"><b>No Google Play</b><p>Android XR is by partnership only, so the base plan is AOSP with its own store and licensed maps, speech and AI.</p></div>
+      <div class="risk"><b>Camera privacy</b><p>A privacy LED that software cannot turn off, a covered-LED check, and no face recognition of strangers.</p></div>
       <div class="risk"><b>Competition</b><p>Differentiate on standalone apps and on-device AI; start with a niche such as business or accessibility users.</p></div>
     </div>
   </div>
@@ -670,7 +786,7 @@ function hbars(elId, rows, fmt) {
 const BOM = [
   ['SoC and power management', 120, 180], ['Two microLED projectors', 80, 160, 1], ['Two waveguides', 60, 150, 1],
   ['5G modem, RF, antennas', 60, 90], ['16 GB LPDDR5X', 45, 70], ['Boards and flexes', 25, 45], ['256 GB UFS 4.0', 20, 30],
-  ['Frame, hinges, lenses', 15, 30], ['Assembly, alignment, test', 15, 30], ['Cameras', 10, 20], ['Audio, sensors, touchpad', 10, 15],
+  ['Frame, hinges, lenses', 15, 30], ['Assembly, alignment, test', 15, 30], ['Cameras and privacy LED', 14, 22], ['Audio, sensors, touchpad', 10, 15],
   ['Charging case and cable', 8, 15], ['Wi-Fi 7 and Bluetooth', 8, 12], ['Battery cells', 6, 10],
 ].map(([k, a, b, hi]) => ({ k, v: (a + b) / 2, hi: !!hi, label: `$${a}–${b}`, tip: `$${a}–${b} per unit, midpoint $${(a + b) / 2}` }));
 BOM.forEach(r => { if (!r.hi) r.hi = false; });
@@ -680,15 +796,15 @@ hbars('bom', BOM, v => '$' + v);
 document.querySelectorAll('#bom .bar i').forEach((i, n) => { i.classList.toggle('hi', BOM[n].hi); });
 
 hbars('uses', [
-  { k: 'Development', v: 9.6, tip: 'Engineering team, ODM engineering, prototypes, tooling, certification, testing, tools' },
-  { k: 'First 5,000 units', v: 3.75, tip: 'First production run at about $750 a unit' },
-  { k: 'Contingency', v: 1.5, tip: 'Across all three stages, about one slip per stage' },
+  { k: 'Development', v: 10.9, tip: 'Engineering team, ODM engineering, prototypes, tooling, certification, testing, camera tuning, app store, SDK and launch apps' },
+  { k: 'First 5,000 units', v: 3.78, tip: 'First production run at about $755 a unit' },
+  { k: 'Contingency', v: 1.6, tip: 'Across all three stages, about one slip per stage' },
   { k: 'Launch and marketing', v: 1.0 },
   { k: 'Running costs', v: 0.5, tip: 'Office, legal, insurance, support' },
 ].map(r => ({ ...r, hi: true })), v => '$' + (v >= 1 ? +v.toFixed(2) + 'M' : Math.round(v * 1000) + 'k'));
 
 // stage segmented bar
-const STAGES = [['Pre-seed', 0.65, 'var(--s1)'], ['Seed', 3.2, 'var(--s2)'], ['Series A', 12.4, 'var(--s3)']];
+const STAGES = [['Pre-seed', 0.65, 'var(--s1)'], ['Seed', 3.4, 'var(--s2)'], ['Series A', 13.65, 'var(--s3)']];
 const tot = STAGES.reduce((a, s) => a + s[1], 0);
 const seg = document.getElementById('segStages'), segL = document.getElementById('segStagesLab');
 STAGES.forEach(([k, v, c]) => {
