@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aurora Smart Glasses</title>
+<meta name="description" content="Aurora: standalone Android display glasses. The concept, the design, the colours and the funding plan from proof of concept to the first 5,000 units.">
+<meta property="og:title" content="Aurora Smart Glasses">
+<meta property="og:description" content="Android apps on a full-colour microLED display in each lens. From concept to design to a $16.25M funding plan.">
+<meta property="og:image" content="assets/img/og.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='20' width='24' height='20' rx='7' fill='none' stroke='%23e8a23a' stroke-width='5'/%3E%3Crect x='36' y='20' width='24' height='20' rx='7' fill='none' stroke='%23e8a23a' stroke-width='5'/%3E%3Cpath d='M28 27h8' stroke='%23e8a23a' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f6f3;
+  --bg-2: #efede8;
+  --card: #ffffff;
+  --ink: #141414;
+  --ink-2: #4f4e4a;
+  --ink-3: #7c7a74;
+  --line: #e2e0da;
+  --accent: #c7781a;
+  --accent-ink: #9a5a0c;
+  --hero-bg: #0d0e10;
+  --hero-ink: #f4f2ee;
+  --s1: #2a78d6;   /* pre-seed */
+  --s2: #eb6834;   /* seed */
+  --s3: #1baf7a;   /* series A */
+  --seq: #2a78d6;
+  --track: #e6e4de;
+  --radius: 18px;
+  --max: 1180px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111213; --bg-2: #17181a; --card: #1c1d1f; --ink: #f2f0ec; --ink-2: #c3c1ba; --ink-3: #8e8c86;
+    --line: #2c2d30; --accent: #e8a23a; --accent-ink: #f0b860; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --seq: #3987e5; --track: #2a2b2e;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111213; --bg-2: #17181a; --card: #1c1d1f; --ink: #f2f0ec; --ink-2: #c3c1ba; --ink-3: #8e8c86;
+  --line: #2c2d30; --accent: #e8a23a; --accent-ink: #f0b860; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --seq: #3987e5; --track: #2a2b2e;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+img, video { display: block; max-width: 100%; }
+a { color: inherit; }
+h1, h2, h3 { font-family: "Inter Tight", Inter, system-ui, sans-serif; letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+h2 { font-size: clamp(32px, 4.6vw, 54px); font-weight: 600; }
+h3 { font-size: 21px; font-weight: 600; letter-spacing: -0.01em; }
+p { margin: 0; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.eyebrow { font: 600 13px/1 Inter, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 18px; }
+.lede { font-size: clamp(18px, 1.8vw, 21px); color: var(--ink-2); max-width: 760px; margin-top: 20px; }
+section { padding: 120px 0; }
+.muted { color: var(--ink-3); }
+.small { font-size: 14px; }
+
+/* nav */
+nav.top { position: fixed; inset: 0 0 auto 0; z-index: 20; transition: background .3s, border-color .3s; border-bottom: 1px solid transparent; }
+nav.top .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+nav.top .brand { font: 700 19px "Inter Tight", sans-serif; letter-spacing: -0.01em; text-decoration: none; color: var(--hero-ink); display: flex; align-items: center; gap: 10px; }
+nav.top .links { display: flex; gap: 22px; margin-left: auto; }
+nav.top .links a { text-decoration: none; font-size: 14px; color: rgba(244,242,238,.72); }
+nav.top .links a:hover { color: #fff; }
+nav.top.solid { background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom-color: var(--line); }
+nav.top.solid .brand { color: var(--ink); }
+nav.top.solid .links a { color: var(--ink-2); }
+nav.top.solid .links a:hover { color: var(--ink); }
+@media (max-width: 860px) { nav.top .links { display: none; } }
+
+/* hero */
+.hero { position: relative; min-height: 100vh; min-height: 100svh; background: var(--hero-bg); color: var(--hero-ink); overflow: hidden; display: flex; align-items: flex-end; padding: 0; }
+.hero video, .hero .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,14,16,.55) 0%, rgba(13,14,16,0) 30%, rgba(13,14,16,0) 55%, rgba(13,14,16,.88) 100%), linear-gradient(90deg, #0d0e10 0%, rgba(13,14,16,.75) 22%, rgba(13,14,16,0) 50%); }
+@media (min-width: 901px) { .hero video, .hero .poster { left: 18%; width: 92%; } }
+@media (max-width: 900px) { .hero video, .hero .poster { top: -18%; height: 80%; } }
+.hero .wrap { position: relative; z-index: 2; padding-bottom: 72px; width: 100%; }
+.hero h1 { font-size: clamp(44px, 8vw, 104px); font-weight: 700; letter-spacing: -0.035em; }
+.hero p { font-size: clamp(18px, 2vw, 22px); color: rgba(244,242,238,.8); max-width: 640px; margin-top: 18px; }
+.hero .cta { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid transparent; }
+.btn.primary { background: var(--hero-ink); color: #111; }
+.btn.ghost { border-color: rgba(244,242,238,.35); color: var(--hero-ink); }
+.hero .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 56px; padding-top: 28px; border-top: 1px solid rgba(244,242,238,.18); }
+.hero .stats b { display: block; font: 600 clamp(22px, 2.6vw, 32px) "Inter Tight", sans-serif; letter-spacing: -0.02em; }
+.hero .stats span { font-size: 14px; color: rgba(244,242,238,.62); }
+@media (max-width: 700px) { .hero .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* concept pillars */
+.pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 56px; }
+.pillar { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+.pillar .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--bg-2); display: grid; place-items: center; margin-bottom: 18px; color: var(--accent-ink); }
+.pillar p { color: var(--ink-2); font-size: 15px; margin-top: 8px; }
+@media (max-width: 980px) { .pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .pillars { grid-template-columns: 1fr; } }
+
+/* colours */
+.colours { background: var(--bg-2); }
+.colour-stage { margin-top: 48px; background: var(--card); border: 1px solid var(--line); border-radius: 28px; overflow: hidden; }
+.colour-stage .img { position: relative; aspect-ratio: 16 / 10; background: #eceae5; }
+.colour-stage .img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .45s ease; }
+.colour-bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 28px; flex-wrap: wrap; }
+.colour-bar .name b { font: 600 22px "Inter Tight", sans-serif; display: block; }
+.colour-bar .name span { color: var(--ink-3); font-size: 14px; }
+.swatches { display: flex; gap: 12px; flex-wrap: wrap; }
+.swatch { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--card); outline: 2px solid transparent; cursor: pointer; padding: 0; background-size: cover; transition: outline-color .2s, transform .2s; }
+.swatch:hover { transform: scale(1.06); }
+.swatch[aria-pressed="true"] { outline-color: var(--ink); }
+.swatch:focus-visible { outline-color: var(--accent); }
+.thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.thumbs button { padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); cursor: pointer; }
+.thumbs button[aria-pressed="true"] { border-color: var(--ink); }
+.thumbs img { aspect-ratio: 16/10; object-fit: cover; width: 100%; }
+@media (max-width: 700px) { .thumbs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* on model */
+.models { display: grid; grid-template-columns: 1.25fr 1fr; grid-template-rows: auto auto; gap: 18px; margin-top: 48px; }
+.models figure { margin: 0; position: relative; border-radius: 22px; overflow: hidden; background: var(--bg-2); }
+.models figure:first-child { grid-row: span 2; }
+.models img { width: 100%; height: 100%; object-fit: cover; }
+.models figcaption { position: absolute; left: 18px; bottom: 16px; background: rgba(15,15,15,.55); color: #fff; font-size: 13px; padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(6px); }
+@media (max-width: 760px) { .models { grid-template-columns: 1fr; } .models figure:first-child { grid-row: auto; } }
+.note { margin-top: 20px; font-size: 14px; color: var(--ink-3); max-width: 760px; }
+
+/* film */
+.film { background: var(--hero-bg); color: var(--hero-ink); }
+.film .lede { color: rgba(244,242,238,.72); }
+.film .eyebrow { color: #e8a23a; }
+.film video { width: 100%; border-radius: 22px; margin-top: 48px; background: #000; aspect-ratio: 16/9; }
+
+/* design */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; margin-top: 64px; }
+.split.rev > :first-child { order: 2; }
+.split figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+.split figure img { width: 100%; }
+.split h3 { font-size: 28px; margin-bottom: 14px; }
+.split p { color: var(--ink-2); }
+.split ul { padding-left: 20px; color: var(--ink-2); margin: 16px 0 0; }
+.split li { margin: 6px 0; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; gap: 28px; } .split.rev > :first-child { order: 0; } }
+.zoomable { cursor: zoom-in; }
+
+.specs { margin-top: 72px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 56px; }
+.specs div { display: flex; justify-content: space-between; gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.specs dt { color: var(--ink-3); font-size: 15px; }
+.specs dd { margin: 0; text-align: right; font-weight: 500; }
+@media (max-width: 760px) { .specs { grid-template-columns: 1fr; } }
+
+/* journey */
+.journey { background: var(--bg-2); }
+.timeline { margin-top: 56px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; position: relative; }
+.step { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; position: relative; }
+.step .when { font-size: 13px; color: var(--accent-ink); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.step h3 { margin: 10px 0 8px; }
+.step p { color: var(--ink-2); font-size: 15px; }
+.step.done .when::before { content: "✓ "; }
+@media (max-width: 980px) { .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .timeline { grid-template-columns: 1fr; } }
+
+/* numbers */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 48px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+.tile .label { font-size: 14px; color: var(--ink-3); }
+.tile .value { font: 600 34px/1.1 "Inter Tight", sans-serif; letter-spacing: -0.02em; margin-top: 8px; }
+.tile .sub { font-size: 13px; color: var(--ink-3); margin-top: 6px; }
+@media (max-width: 900px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 30px; margin-top: 18px; }
+.card h3 { margin-bottom: 6px; }
+.card .cap { color: var(--ink-3); font-size: 14px; margin-bottom: 22px; }
+
+/* horizontal bars (single series) */
+.hbars { display: grid; grid-template-columns: minmax(150px, 220px) 1fr auto; gap: 10px 16px; align-items: center; font-size: 14px; }
+.hbars .lab { color: var(--ink-2); }
+.hbars .bar { height: 14px; position: relative; }
+.hbars .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--seq); border-radius: 0 4px 4px 0; opacity: .38; }
+.hbars .bar i.hi { opacity: 1; }
+.hbars .val { color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.hbars .row { display: contents; }
+.hbars .row:hover .lab { color: var(--ink); }
+@media (max-width: 600px) { .hbars { grid-template-columns: 1fr auto; } .hbars .bar { grid-column: 1 / -1; margin-top: -6px; } }
+.legend-inline { display: flex; gap: 18px; font-size: 13px; color: var(--ink-3); margin-top: 18px; flex-wrap: wrap; }
+.legend-inline span { display: inline-flex; align-items: center; gap: 8px; }
+.legend-inline i { width: 18px; height: 10px; border-radius: 3px; background: var(--seq); }
+
+/* funding */
+.funding { background: var(--bg); }
+.seg { display: flex; gap: 2px; height: 28px; margin-top: 10px; }
+.seg > div { border-radius: 4px; position: relative; cursor: default; }
+.seg-labels { display: flex; gap: 2px; margin-top: 10px; font-size: 13px; color: var(--ink-2); }
+.seg-labels > div { min-width: 0; }
+.legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 18px; font-size: 14px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; }
+.stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.stage { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; display: flex; flex-direction: column; }
+.stage .top { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-3); }
+.stage .top i { width: 10px; height: 10px; border-radius: 3px; }
+.stage .amt { font: 600 44px/1 "Inter Tight", sans-serif; letter-spacing: -0.03em; margin: 14px 0 4px; }
+.stage .proves { color: var(--ink-2); font-size: 15px; margin-top: 10px; }
+.stage h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 22px 0 8px; font-weight: 600; }
+.stage table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.stage td { padding: 7px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: top; }
+.stage td:last-child { text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px; }
+.stage ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
+.stage li { margin: 5px 0; }
+@media (max-width: 980px) { .stages { grid-template-columns: 1fr; } }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+table.plain { width: 100%; border-collapse: collapse; font-size: 15px; }
+table.plain th, table.plain td { text-align: left; padding: 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.plain th { font-size: 13px; color: var(--ink-3); font-weight: 600; }
+table.plain td.num, table.plain th.num { text-align: right; font-variant-numeric: tabular-nums; padding-left: 16px; }
+table.plain tr.total td { font-weight: 600; border-bottom: 0; }
+.scroll-x { overflow-x: auto; }
+
+.risks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 40px; }
+.risk { border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; background: var(--card); }
+.risk b { display: block; margin-bottom: 4px; }
+.risk p { font-size: 15px; color: var(--ink-2); }
+@media (max-width: 760px) { .risks { grid-template-columns: 1fr; } }
+
+.closing { background: var(--hero-bg); color: var(--hero-ink); text-align: center; }
+.closing .lede { margin-left: auto; margin-right: auto; color: rgba(244,242,238,.72); }
+.closing img { margin: 56px auto 0; border-radius: 22px; }
+footer { padding: 40px 0 56px; font-size: 13px; color: var(--ink-3); background: var(--bg); }
+footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+
+/* tooltip */
+.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 13px; padding: 8px 11px; border-radius: 8px; opacity: 0; transition: opacity .12s; max-width: 260px; }
+.tip.on { opacity: 1; }
+
+/* lightbox */
+.lightbox { position: fixed; inset: 0; z-index: 60; background: rgba(10,10,10,.9); display: none; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }
+.lightbox.on { display: flex; }
+.lightbox img { max-height: 92vh; border-radius: 12px; background: #fff; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav class="top" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg width="30" height="16" viewBox="0 0 64 34" aria-hidden="true"><rect x="3" y="7" width="24" height="20" rx="7" fill="none" stroke="#e8a23a" stroke-width="5"/><rect x="37" y="7" width="24" height="20" rx="7" fill="none" stroke="#e8a23a" stroke-width="5"/><path d="M27 14h10" stroke="#e8a23a" stroke-width="5"/></svg>
+      Aurora
+    </a>
+    <div class="links">
+      <a href="#concept">Concept</a>
+      <a href="#colours">Colours</a>
+      <a href="#on-model">On model</a>
+      <a href="#design">Design</a>
+      <a href="#journey">Roadmap</a>
+      <a href="#funding">Funding</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <img class="poster" src="assets/img/hero.jpg" alt="">
+  <video autoplay muted loop playsinline poster="assets/img/hero.jpg" aria-label="Aurora glasses turning on a turntable">
+    <source src="assets/video/turntable.mp4" type="video/mp4">
+    <source src="assets/video/turntable.webm" type="video/webm">
+  </video>
+  <div class="wrap">
+    <div class="eyebrow" style="color:#e8a23a">Standalone display glasses</div>
+    <h1>Aurora</h1>
+    <p>Your Android apps, on a full-colour display in each lens. Its own processor, its own 5G, and room to grow into on-device AI.</p>
+    <div class="cta">
+      <a class="btn primary" href="#funding">See the funding plan</a>
+      <a class="btn ghost" href="#film">Watch it come apart</a>
+    </div>
+    <div class="stats">
+      <div><b>2 × microLED</b><span>full-colour waveguide displays</span></div>
+      <div><b>16 GB</b><span>memory on an XR2 Gen 2-class SoC</span></div>
+      <div><b>65–85 g</b><span>target weight, electronics in both arms</span></div>
+      <div><b>$16.25M</b><span>to ship the first 5,000 units</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- CONCEPT -->
+<section id="concept">
+  <div class="wrap reveal">
+    <div class="eyebrow">01 · The concept</div>
+    <h2>A phone's worth of computer,<br>folded into a pair of frames.</h2>
+    <p class="lede">Most display glasses are accessories that lean on a phone. Aurora is built to stand on its own: it runs Android apps itself, shows them on both lenses, and connects to the internet without a phone nearby. The design keeps the weight and the heat split across both arms so it still wears like glasses.</p>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="8" height="10" rx="3"/><rect x="13" y="6" width="8" height="10" rx="3"/><path d="M6 10h2M16 10h2"/></svg></div>
+        <h3>See it</h3>
+        <p>A tiny full-colour microLED projector in each end piece shines into a waveguide lens that carries the image to your eye.</p>
+      </div>
+      <div class="pillar">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg></div>
+        <h3>Run it</h3>
+        <p>An XR2 Gen 2-class processor with 16 GB of memory and 256 GB of storage runs Android apps on the glasses themselves.</p>
+      </div>
+      <div class="pillar">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg></div>
+        <h3>Connect it</h3>
+        <p>5G sub-6 GHz, Wi-Fi 7 and Bluetooth 5.4, with antennas hidden behind plastic windows in the arms.</p>
+      </div>
+      <div class="pillar">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 19l-5-3-5 3 1.4-6.2L4 9l5.8-.7z"/></svg></div>
+        <h3>Think with it</h3>
+        <p>On-device AI on the processor's own engine today, with a board footprint kept free for the Aurora-Nano language-model chip later.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COLOURS -->
+<section class="colours" id="colours">
+  <div class="wrap reveal">
+    <div class="eyebrow">02 · Colours</div>
+    <h2>Six finishes. One frame.</h2>
+    <p class="lede">The same electronics sit inside every finish, so colour is a moulding and coating choice, not a new product. Pick one to see it.</p>
+    <div class="colour-stage">
+      <div class="img" id="colourImg"></div>
+      <div class="colour-bar">
+        <div class="name"><b id="colourName">Obsidian</b><span id="colourDesc">Gloss black, clear lenses</span></div>
+        <div class="swatches" id="swatches" role="group" aria-label="Frame colour"></div>
+      </div>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+</section>
+
+<!-- ON MODEL -->
+<section id="on-model">
+  <div class="wrap reveal">
+    <div class="eyebrow">03 · On model</div>
+    <h2>How it sits on a face.</h2>
+    <p class="lede">The arms rest on the ears like ordinary glasses. The batteries ride behind the ears to balance the weight of the lenses at the front.</p>
+    <div class="models">
+      <figure><img src="assets/img/model-1.jpg" alt="Havana tortoiseshell Aurora glasses with amber lenses on a sculpted bust, three-quarter view" loading="lazy"><figcaption>Havana · amber lenses</figcaption></figure>
+      <figure><img src="assets/img/model-2.jpg" alt="Glacier white Aurora glasses on a sculpted bust, profile view" loading="lazy"><figcaption>Glacier · clear lenses</figcaption></figure>
+      <figure><img src="assets/img/model-3.jpg" alt="Midnight blue Aurora glasses with sun lenses on a sculpted bust, front view" loading="lazy"><figcaption>Midnight · sun lenses</figcaption></figure>
+    </div>
+    <p class="note">These are 3D renders on sculpted display busts, built from the same model as the product renders. They stand in for photography of real people wearing prototypes, which can replace them once proof-of-concept frames exist.</p>
+  </div>
+</section>
+
+<!-- FILM -->
+<section class="film" id="film">
+  <div class="wrap reveal">
+    <div class="eyebrow">04 · Inside</div>
+    <h2>Every part has a place.</h2>
+    <p class="lede">The frame splits the electronics between the two arms: the main computer on the right, the radios on the left, a battery behind each ear and a projector at each hinge.</p>
+    <video controls muted loop playsinline preload="metadata" poster="assets/img/explode-poster.jpg">
+      <source src="assets/video/explode.webm" type="video/webm">
+      <source src="assets/video/explode.mp4" type="video/mp4">
+    </video>
+  </div>
+</section>
+
+<!-- DESIGN -->
+<section id="design">
+  <div class="wrap reveal">
+    <div class="eyebrow">05 · Design</div>
+    <h2>From block diagram to frame.</h2>
+    <p class="lede">The design started as a list of what the glasses must do, became an electrical block diagram, then a packaging plan that fits each board into a 6.5 mm thick arm.</p>
+
+    <div class="split">
+      <figure class="zoomable"><img src="assets/img/exploded.jpg" alt="Exploded view of the glasses with each part labelled" loading="lazy"></figure>
+      <div>
+        <h3>Exploded view</h3>
+        <p>Each part pulled out along the direction it is assembled. Two rigid boards, joined by flexible circuits that loop around the hinge pins so the arms fold without creasing them.</p>
+        <ul>
+          <li><b>Right arm:</b> 60 × 13 mm main board with the processor, 16 GB memory stacked on top, storage and power management</li>
+          <li><b>Left arm:</b> radio board with the 5G modem, Wi-Fi 7, Bluetooth, charger and audio</li>
+          <li><b>Behind each ear:</b> a 46 × 10 × 6 mm cell, about 1.3 Wh each</li>
+          <li><b>At each hinge:</b> a 6 × 6 × 10 mm microLED projector</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="split rev">
+      <figure class="zoomable"><img src="assets/img/block-diagram.png" alt="Main board block diagram" loading="lazy"></figure>
+      <div>
+        <h3>Main-board block diagram</h3>
+        <p>The application processor sits at the centre with memory, storage, the display bridge to both projectors, cameras, touch, audio and the radios around it. Power comes from a dedicated PMIC fed by the two arm batteries.</p>
+        <p style="margin-top:12px">The biggest engineering risk is power: the full feature set can draw 4–10 W against a 2.7 Wh battery and a frame that can only shed 1–2 W of heat. The plan measures it on a proof of concept before any custom board is made.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <figure class="zoomable"><img src="assets/img/packaging.png" alt="Packaging layout of boards inside the frame" loading="lazy"></figure>
+      <div>
+        <h3>Packaging plan</h3>
+        <p>Where every board, cell and flex goes, with the clearances that set the frame's size. About 1 W of heat goes into each arm, spread by a graphite sheet to the outer shell and kept off the skin by an air gap.</p>
+      </div>
+    </div>
+
+    <dl class="specs">
+      <div><dt>Processor</dt><dd>Snapdragon XR2 Gen 2-class</dd></div>
+      <div><dt>Memory · storage</dt><dd>16 GB LPDDR5X · 256 GB UFS 4.0</dd></div>
+      <div><dt>Display</dt><dd>2 × full-colour microLED, waveguide lenses</dd></div>
+      <div><dt>Connectivity</dt><dd>5G sub-6 GHz · Wi-Fi 7 · Bluetooth 5.4</dd></div>
+      <div><dt>Input</dt><dd>Capacitive touchpad on the right arm</dd></div>
+      <div><dt>Cameras</dt><dd>One in each front corner</dd></div>
+      <div><dt>Battery</dt><dd>About 2.7 Wh across two cells</dd></div>
+      <div><dt>Weight</dt><dd>About 65–85 g (target to bring down)</dd></div>
+      <div><dt>Charging</dt><dd>Pogo pins into a charging case</dd></div>
+      <div><dt>Target price</dt><dd>About $1,499</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- JOURNEY -->
+<section class="journey" id="journey">
+  <div class="wrap reveal">
+    <div class="eyebrow">06 · Roadmap</div>
+    <h2>Concept to first 5,000 units<br>in about 30 months.</h2>
+    <p class="lede">Each stage retires one big risk before the next stage is funded.</p>
+    <div class="timeline">
+      <div class="step done"><div class="when">Done</div><h3>Concept and design</h3><p>Requirements, main-board block diagram, packaging plan, concept renders and a cost and sourcing estimate.</p></div>
+      <div class="step"><div class="when">Months 0–6</div><h3>Proof of concept</h3><p>Development kit plus microLED and waveguide evaluation kits on a 3D-printed frame. Proves display, apps, battery life and heat.</p></div>
+      <div class="step"><div class="when">Months 6–15</div><h3>Engineering prototypes</h3><p>Custom boards and frame in two EVT builds of about 50 units, with pilot users and pre-compliance radio tests.</p></div>
+      <div class="step"><div class="when">Months 15–30</div><h3>Certify and ship</h3><p>DVT and PVT builds, tooling, FCC, CE and carrier certification, then the first 5,000 units.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COST -->
+<section id="cost">
+  <div class="wrap reveal">
+    <div class="eyebrow">07 · What it costs to make</div>
+    <h2>The display is half the bill.</h2>
+    <p class="lede">Planning estimates from typical industry rates and teardowns of similar glasses. Every number is to be replaced by a supplier quote before it is relied on.</p>
+    <div class="tiles">
+      <div class="tile"><div class="label">One-time development</div><div class="value">$3.5–10M</div><div class="sub">engineering, prototypes, tooling, certification</div></div>
+      <div class="tile"><div class="label">Unit cost at volume</div><div class="value">$500–850</div><div class="sub">10k–100k units a year</div></div>
+      <div class="tile"><div class="label">Unit cost, prototypes</div><div class="value">$2.0–4.5k</div><div class="sub">10–100 unit builds</div></div>
+      <div class="tile"><div class="label">Gross margin, direct</div><div class="value">49%</div><div class="sub">at $1,499 retail, volume cost</div></div>
+    </div>
+    <div class="card">
+      <h3>Parts and assembly per unit at volume</h3>
+      <p class="cap">Midpoint of each range, US dollars. Bars show the midpoint; the figure on the right is the full range.</p>
+      <div class="hbars" id="bom"></div>
+      <div class="legend-inline"><span><i></i>Display system (projectors and waveguides)</span><span><i style="opacity:.38"></i>Everything else</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNDING -->
+<section class="funding" id="funding" style="padding-top:40px">
+  <div class="wrap reveal">
+    <div class="eyebrow">08 · Funding requirement</div>
+    <h2>$16.25M, in three gated stages.</h2>
+    <p class="lede">Each stage is released only when the stage before hits its milestones, so investors fund the next risk only after the last one is retired. The realistic range is $12–20M depending on quotes, team location and prototype rounds.</p>
+
+    <div class="card">
+      <h3>The ask by stage</h3>
+      <p class="cap">Share of the $16.25M total.</p>
+      <div class="seg" id="segStages"></div>
+      <div class="seg-labels" id="segStagesLab"></div>
+      <div class="legend">
+        <span><i style="background:var(--s1)"></i>Pre-seed</span>
+        <span><i style="background:var(--s2)"></i>Seed</span>
+        <span><i style="background:var(--s3)"></i>Series A</span>
+      </div>
+    </div>
+
+    <div class="stages">
+      <div class="stage">
+        <div class="top"><i style="background:var(--s1)"></i>Stage 1 · Pre-seed · months 0–6</div>
+        <div class="amt">$650k</div>
+        <p class="proves">Proves the display, apps, battery life and heat on a working proof of concept, and that an ODM will build it.</p>
+        <h4>Use of funds</h4>
+        <table>
+          <tr><td>Team of 4 for 6 months</td><td>$410k</td></tr>
+          <tr><td>Proof-of-concept hardware and eval kits</td><td>$120k</td></tr>
+          <tr><td>Company setup, legal, patents</td><td>$50k</td></tr>
+          <tr><td>Supplier and ODM engagement</td><td>$30k</td></tr>
+          <tr><td>Contingency</td><td>$40k</td></tr>
+        </table>
+        <h4>Unlocks the seed when</h4>
+        <ul><li>A worn proof of concept shows Android apps</li><li>Power and heat measured, path to 2 h mixed use</li><li>Architecture decided; ODM quote or LOI signed</li></ul>
+      </div>
+      <div class="stage">
+        <div class="top"><i style="background:var(--s2)"></i>Stage 2 · Seed · months 6–15</div>
+        <div class="amt">$3.2M</div>
+        <p class="proves">Proves custom engineering prototypes work end to end and that pilot users want them.</p>
+        <h4>Use of funds</h4>
+        <table>
+          <tr><td>Team growing from 4 to 12</td><td>$1.53M</td></tr>
+          <tr><td>ODM or design-house engineering</td><td>$700k</td></tr>
+          <tr><td>Two EVT builds, ~50 units each</td><td>$300k</td></tr>
+          <tr><td>Display samples, lab and test gear</td><td>$150k</td></tr>
+          <tr><td>Pre-compliance radio and SAR</td><td>$60k</td></tr>
+          <tr><td>Tools, office, legal, insurance</td><td>$160k</td></tr>
+          <tr><td>Contingency</td><td>$300k</td></tr>
+        </table>
+        <h4>Unlocks the Series A when</h4>
+        <ul><li>EVT units work end to end</li><li>Battery life and skin temperature on target</li><li>50+ units with pilot users; pre-orders or LOIs</li></ul>
+      </div>
+      <div class="stage">
+        <div class="top"><i style="background:var(--s3)"></i>Stage 3 · Series A · months 15–30</div>
+        <div class="amt">$12.4M</div>
+        <p class="proves">Proves the product certifies, the factory line yields, and the first 5,000 units ship.</p>
+        <h4>Use of funds</h4>
+        <table>
+          <tr><td>Team of about 16 for 15 months</td><td>$4.08M</td></tr>
+          <tr><td>First run: 5,000 units at ~$750</td><td>$3.75M</td></tr>
+          <tr><td>ODM DVT/PVT engineering and builds</td><td>$1.05M</td></tr>
+          <tr><td>Launch and marketing</td><td>$1.0M</td></tr>
+          <tr><td>Certification and reliability testing</td><td>$750k</td></tr>
+          <tr><td>Production tooling</td><td>$350k</td></tr>
+          <tr><td>Operations, legal, support</td><td>$300k</td></tr>
+          <tr><td>Contingency</td><td>$1.12M</td></tr>
+        </table>
+        <h4>Done when</h4>
+        <ul><li>US and EU certifications granted</li><li>Factory yield above 90% at PVT</li><li>First 5,000 units shipped</li></ul>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h3>Where the $16.25M goes</h3>
+        <p class="cap">Across all three stages, US dollars.</p>
+        <div class="hbars" id="uses"></div>
+      </div>
+      <div class="card">
+        <h3>Unit economics at $1,499</h3>
+        <p class="cap">Per unit at volume cost.</p>
+        <div class="scroll-x">
+        <table class="plain">
+          <tr><th></th><th class="num">Direct</th><th class="num">Retail</th></tr>
+          <tr><td>Revenue to the company</td><td class="num">$1,454</td><td class="num">~$1,050</td></tr>
+          <tr><td>Parts and assembly</td><td class="num">$650</td><td class="num">$650</td></tr>
+          <tr><td>Royalties, freight, warranty</td><td class="num">$85</td><td class="num">$85</td></tr>
+          <tr class="total"><td>Gross profit</td><td class="num">~$720 (49%)</td><td class="num">~$315 (30%)</td></tr>
+        </table>
+        </div>
+        <p class="small muted" style="margin-top:14px">Break-even at about 900 units a month after launch, or 10,000–11,000 a year.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>A leaner path: about $10M</h3>
+      <p class="cap">Pair with a phone instead of carrying 5G, use the glasses-specific Snapdragon AR1+, and build on an ODM reference design.</p>
+      <div class="scroll-x">
+      <table class="plain">
+        <tr><th>Stage</th><th class="num">Full plan</th><th class="num">Lean plan</th></tr>
+        <tr><td>Pre-seed</td><td class="num">$650k</td><td class="num">$650k</td></tr>
+        <tr><td>Seed</td><td class="num">$3.2M</td><td class="num">~$2.5M</td></tr>
+        <tr><td>Series A</td><td class="num">$12.4M</td><td class="num">~$7M</td></tr>
+        <tr class="total"><td>Total</td><td class="num">~$16.25M</td><td class="num">~$10M</td></tr>
+      </table>
+      </div>
+      <p class="small muted" style="margin-top:14px">Savings come from a smaller team, no cellular certification or royalties, and a cheaper unit (about $450 instead of $750 at first run). The glasses then need a phone nearby when away from Wi-Fi.</p>
+    </div>
+
+    <div class="risks">
+      <div class="risk"><b>Battery life and heat</b><p>Measured on the proof of concept before any custom board; AR1+ and dropping always-on 5G are ready fallbacks.</p></div>
+      <div class="risk"><b>Weight and comfort</b><p>Weight target set at pre-seed; 8 GB memory, a single-eye display or no 5G each save weight.</p></div>
+      <div class="risk"><b>Qualcomm access</b><p>Work through an ODM or design house that already holds access; a pre-seed milestone.</p></div>
+      <div class="risk"><b>Display supply and cost</b><p>Evaluate two waveguide suppliers early and keep a single-eye or monochrome option.</p></div>
+      <div class="risk"><b>Certification</b><p>Pre-compliance scans in the seed stage; 5G carrier approval can follow launch.</p></div>
+      <div class="risk"><b>Competition</b><p>Differentiate on standalone apps and on-device AI; start with a niche such as business or accessibility users.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap reveal">
+    <div class="eyebrow" style="color:#e8a23a">The ask</div>
+    <h2>$650k to put the first pair on a face.</h2>
+    <p class="lede">The pre-seed funds a working proof of concept in six months, the measurements that decide the architecture, and a signed path to a manufacturer.</p>
+    <img src="assets/img/front.jpg" alt="Front view of the Aurora glasses" loading="lazy">
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Aurora smart glasses · concept stage</span>
+    <span>All figures are planning estimates, not quotes. Images and video are 3D concept renders.</span>
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="lightbox" id="lightbox"><img alt=""></div>
+
+<script>
+// ---------- colours ----------
+const COLOURS = [
+  { id: 'obsidian', name: 'Obsidian', desc: 'Gloss black, clear lenses', sw: '#1d1e22' },
+  { id: 'glacier', name: 'Glacier', desc: 'Satin white, clear lenses', sw: '#e9e8e3' },
+  { id: 'havana', name: 'Havana', desc: 'Tortoiseshell, amber lenses', sw: 'radial-gradient(circle at 30% 30%, #c27a2c, #6b3a17 55%, #2a140a)' },
+  { id: 'midnight', name: 'Midnight', desc: 'Deep blue, sun lenses', sw: '#1b2a4c' },
+  { id: 'sage', name: 'Sage', desc: 'Soft green, clear lenses', sw: '#7d907e' },
+  { id: 'blush', name: 'Blush', desc: 'Warm pink, rose lenses', sw: '#dcaa9c' },
+];
+const stage = document.getElementById('colourImg'), sws = document.getElementById('swatches'), th = document.getElementById('thumbs');
+const imgs = {};
+COLOURS.forEach((c, i) => {
+  const im = new Image(); im.src = `assets/img/colour-${c.id}.jpg`; im.alt = `Aurora glasses in ${c.name}`; im.style.opacity = i ? 0 : 1;
+  stage.appendChild(im); imgs[c.id] = im;
+  const b = document.createElement('button'); b.className = 'swatch'; b.style.background = c.sw; b.title = c.name; b.setAttribute('aria-label', c.name);
+  b.onclick = () => pick(c.id); sws.appendChild(b); c.btn = b;
+  const t = document.createElement('button'); t.innerHTML = `<img src="assets/img/colour-${c.id}.jpg" alt="" loading="lazy">`; t.setAttribute('aria-label', c.name);
+  t.onclick = () => pick(c.id); th.appendChild(t); c.th = t;
+});
+function pick(id) {
+  COLOURS.forEach(c => { const on = c.id === id; imgs[c.id].style.opacity = on ? 1 : 0; c.btn.setAttribute('aria-pressed', on); c.th.setAttribute('aria-pressed', on);
+    if (on) { document.getElementById('colourName').textContent = c.name; document.getElementById('colourDesc').textContent = c.desc; } });
+}
+pick('obsidian');
+
+// ---------- bars ----------
+const tip = document.getElementById('tip');
+function hover(el, html) {
+  el.addEventListener('mousemove', e => { tip.innerHTML = html; tip.classList.add('on'); tip.style.left = Math.min(e.clientX + 14, innerWidth - 280) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; });
+  el.addEventListener('mouseleave', () => tip.classList.remove('on'));
+}
+function hbars(elId, rows, fmt) {
+  const el = document.getElementById(elId), max = Math.max(...rows.map(r => r.v));
+  rows.forEach(r => {
+    const row = document.createElement('div'); row.className = 'row';
+    row.innerHTML = `<div class="lab">${r.k}</div><div class="bar"><i class="${r.hi ? 'hi' : ''}" style="width:${(r.v / max * 100).toFixed(1)}%"></i></div><div class="val">${r.label || fmt(r.v)}</div>`;
+    el.appendChild(row);
+    [...row.children].forEach(c => hover(c, `<b>${r.k}</b><br>${r.tip || r.label || fmt(r.v)}`));
+  });
+}
+const BOM = [
+  ['SoC and power management', 120, 180], ['Two microLED projectors', 80, 160, 1], ['Two waveguides', 60, 150, 1],
+  ['5G modem, RF, antennas', 60, 90], ['16 GB LPDDR5X', 45, 70], ['Boards and flexes', 25, 45], ['256 GB UFS 4.0', 20, 30],
+  ['Frame, hinges, lenses', 15, 30], ['Assembly, alignment, test', 15, 30], ['Cameras', 10, 20], ['Audio, sensors, touchpad', 10, 15],
+  ['Charging case and cable', 8, 15], ['Wi-Fi 7 and Bluetooth', 8, 12], ['Battery cells', 6, 10],
+].map(([k, a, b, hi]) => ({ k, v: (a + b) / 2, hi: !!hi, label: `$${a}–${b}`, tip: `$${a}–${b} per unit, midpoint $${(a + b) / 2}` }));
+BOM.forEach(r => { if (!r.hi) r.hi = false; });
+document.querySelectorAll('#bom').forEach(() => {});
+hbars('bom', BOM, v => '$' + v);
+// display system highlighted, rest muted
+document.querySelectorAll('#bom .bar i').forEach((i, n) => { i.classList.toggle('hi', BOM[n].hi); });
+
+hbars('uses', [
+  { k: 'Development', v: 9.6, tip: 'Engineering team, ODM engineering, prototypes, tooling, certification, testing, tools' },
+  { k: 'First 5,000 units', v: 3.75, tip: 'First production run at about $750 a unit' },
+  { k: 'Contingency', v: 1.5, tip: 'Across all three stages, about one slip per stage' },
+  { k: 'Launch and marketing', v: 1.0 },
+  { k: 'Running costs', v: 0.5, tip: 'Office, legal, insurance, support' },
+].map(r => ({ ...r, hi: true })), v => '$' + (v >= 1 ? +v.toFixed(2) + 'M' : Math.round(v * 1000) + 'k'));
+
+// stage segmented bar
+const STAGES = [['Pre-seed', 0.65, 'var(--s1)'], ['Seed', 3.2, 'var(--s2)'], ['Series A', 12.4, 'var(--s3)']];
+const tot = STAGES.reduce((a, s) => a + s[1], 0);
+const seg = document.getElementById('segStages'), segL = document.getElementById('segStagesLab');
+STAGES.forEach(([k, v, c]) => {
+  const d = document.createElement('div'); d.style.cssText = `flex:${v};background:${c}`; seg.appendChild(d);
+  const amt = v < 1 ? `$${v * 1000}k` : `$${v}M`;
+  hover(d, `<b>${k}</b><br>${amt} · ${(v / tot * 100).toFixed(0)}% of the total`);
+  const l = document.createElement('div'); l.style.flex = Math.max(v, 1.6); l.innerHTML = `<b>${amt}</b><br><span class="muted">${(v / tot * 100).toFixed(0)}%</span>`; segL.appendChild(l);
+});
+
+// ---------- nav, reveal, lightbox ----------
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('solid', scrollY > innerHeight * 0.75);
+addEventListener('scroll', onScroll, { passive: true }); onScroll();
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+const lb = document.getElementById('lightbox');
+document.querySelectorAll('.zoomable img').forEach(im => im.addEventListener('click', () => { lb.querySelector('img').src = im.src; lb.classList.add('on'); }));
+lb.addEventListener('click', () => lb.classList.remove('on'));
+addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
+</script>
+</body>
+</html>

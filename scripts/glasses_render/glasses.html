@@ -5,10 +5,10 @@
 <title>Aurora glasses render</title>
 <style>
   html, body { margin: 0; padding: 0; }
-  body { width: 2400px; height: 1500px; overflow: hidden;
+  body { overflow: hidden;
          background: radial-gradient(ellipse at 50% 40%, #ffffff 0%, #eef0f3 45%, #d9dde3 100%);
          font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
-  #wrap { position: relative; width: 2400px; height: 1500px; }
+  #wrap { position: relative; }
   canvas { position: absolute; left: 0; top: 0; }
   svg { position: absolute; left: 0; top: 0; pointer-events: none; }
   .title { position: absolute; left: 70px; top: 54px; color: #1b1f24; }
@@ -34,9 +34,16 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 const params = new URLSearchParams(location.search);
-const MODE = params.get('mode') || 'assembled';   // assembled | exploded | front
-const EXPLODED = MODE === 'exploded';
-const W = 2400, H = 1500;
+const MODE = params.get('mode') || 'assembled';   // assembled | exploded | front | anim | worn
+const EXPLODED = MODE === 'exploded' || MODE === 'anim';   // build arms as separate shells
+const W = +params.get('w') || 2400, H = +params.get('h') || 1500;
+const CLEAN = params.has('clean') || MODE === 'anim' || MODE === 'worn';   // no titles or labels
+const COLOR = params.get('color') || 'obsidian';
+const LENS = params.get('lens') || 'clear';
+const VIEW = params.get('view') || 'three-quarter';
+const BG = (params.get('bg') || '').split(',').filter(Boolean).map(c => '#' + c);
+document.body.style.width = W + 'px'; document.body.style.height = H + 'px';
+document.getElementById('wrap').style.cssText = `width:${W}px;height:${H}px`;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1);
@@ -50,7 +57,8 @@ document.getElementById('wrap').prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = (() => { const c = document.createElement('canvas'); c.width = 1200; c.height = 750; const g = c.getContext('2d');
-  const grd = g.createRadialGradient(600, 300, 50, 600, 375, 820); grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.45, '#eef0f3'); grd.addColorStop(1, '#d6dae0');
+  const [b0, b1, b2] = BG.length ? [BG[0], BG[1] || BG[0], BG[2] || BG[1] || BG[0]] : ['#ffffff', '#eef0f3', '#d6dae0'];
+  const grd = g.createRadialGradient(600, 300, 50, 600, 375, 820); grd.addColorStop(0, b0); grd.addColorStop(0.45, b1); grd.addColorStop(1, b2);
   g.fillStyle = grd; g.fillRect(0, 0, 1200, 750); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -60,7 +68,7 @@ scene.environmentIntensity = 0.9;
 const key = new THREE.DirectionalLight(0xffffff, 2.4);
 key.position.set(-120, 320, 160);
 key.castShadow = true;
-key.shadow.mapSize.set(4096, 4096);
+key.shadow.mapSize.set(MODE === 'anim' ? 2048 : 4096, MODE === 'anim' ? 2048 : 4096);
 const sc = key.shadow.camera;
 sc.left = -330; sc.right = 330; sc.top = 330; sc.bottom = -330; sc.near = 10; sc.far = 900;
 key.shadow.radius = 6; key.shadow.bias = -0.0004;
@@ -171,9 +179,39 @@ const M = {
   ceramic: new THREE.MeshPhysicalMaterial({ color: 0x9a7b55, roughness: 0.5 }),
 };
 
+// ---------- colour variants ----------
+const tortoiseTex = canvasTex(1024, 1024, (g, w, h) => {
+  g.fillStyle = '#7a4318'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 150; i++) {
+    const x = rnd() * w, y = rnd() * h, r = 50 + rnd() * 150, dark = rnd() < 0.6;
+    const grd = g.createRadialGradient(x, y, 0, x, y, r);
+    grd.addColorStop(0, dark ? 'rgba(28,12,4,0.85)' : 'rgba(214,140,58,0.7)');
+    grd.addColorStop(1, dark ? 'rgba(28,12,4,0)' : 'rgba(214,140,58,0)');
+    g.fillStyle = grd; g.beginPath(); g.ellipse(x, y, r * 1.6, r, rnd() * 3, 0, 7); g.fill();
+  }
+});
+tortoiseTex.wrapS = tortoiseTex.wrapT = THREE.RepeatWrapping; tortoiseTex.repeat.set(1 / 120, 1 / 120);
+const PALETTES = {
+  obsidian: { frame: 0x1d1e22, inner: 0x26272c, rough: 0.32, cc: 0.9 },
+  glacier:  { frame: 0xe9e8e3, inner: 0xd6d5d0, rough: 0.42, cc: 0.6, touch: 0xbfc1c4 },
+  havana:   { tex: tortoiseTex, inner: 0x3b2314, rough: 0.22, cc: 1.0 },
+  midnight: { frame: 0x1b2a4c, inner: 0x16213a, rough: 0.3, cc: 0.9 },
+  sage:     { frame: 0x7d907e, inner: 0x6a7b6b, rough: 0.5, cc: 0.4, touch: 0x5d6b5e },
+  blush:    { frame: 0xdcaa9c, inner: 0xc9968a, rough: 0.4, cc: 0.7, touch: 0xb48478 },
+};
+const PAL = PALETTES[COLOR] || PALETTES.obsidian;
+if (PAL.tex) { M.frame.map = PAL.tex; M.frame.color.set(0xffffff); } else M.frame.color.set(PAL.frame);
+M.frame.roughness = PAL.rough; M.frame.clearcoat = PAL.cc;
+M.frameInner.color.set(PAL.inner); M.antennaWin.color.set(PAL.inner);
+if (PAL.touch) M.touch.color.set(PAL.touch);
+const LENSES = { clear: [0xffffff, 0.22], sun: [0x26241f, 0.8], amber: [0x9a5a1c, 0.55], blue: [0x2d4f86, 0.55], rose: [0xc77f86, 0.45] };
+const [lensCol, lensOp] = LENSES[LENS] || LENSES.clear;
+M.lens.color.set(lensCol); M.lens.opacity = lensOp;
+
+
 // ---------- helpers ----------
 const labels = [];  // {obj, local, title, sub}
-function addLabel(obj, title, sub, local = new THREE.Vector3(), pref) { labels.push({ obj, local, title, sub, pref }); }
+function addLabel(obj, title, sub, local = new THREE.Vector3(), pref) { if (labelOn) labels.push({ obj, local, title, sub, pref }); }
 function shadowy(o) { o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; }
 function rbox(w, h, d, r, mat) { return shadowy(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 4, Math.min(r, w / 2, h / 2, d / 2) * 0.999), mat)); }
 function box(w, h, d, mat) { return shadowy(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat)); }
@@ -411,9 +449,13 @@ function ribbon(points, width, mat) {
 }
 
 // ---------- assemble ----------
-const root = new THREE.Group(); scene.add(root);
-const E = EXPLODED ? 1 : 0;
+let labelOn = false;
+function buildAll(E) {
+seed = 991;
+labelOn = !CLEAN && E === 1;
 const ex = (v) => v * E;
+const root = new THREE.Group();
+const fade = [], armGroups = [];
 
 // Front frame + lenses
 const front = buildFrontFrame(); root.add(front);
@@ -422,7 +464,7 @@ if (EXPLODED) addLabel(front, 'Front frame', 'acetate-over-metal, end pieces hol
 [-1, 1].forEach(s => {
   const lens = buildLens(s * LX);
   lens.position.z = ex(48);
-  if (EXPLODED) lens.children[0].material = Object.assign(M.lens.clone(), { color: new THREE.Color(0xb9d2e6), opacity: 0.45 });
+  if (MODE === 'exploded') lens.children[0].material = Object.assign(M.lens.clone(), { color: new THREE.Color(0xb9d2e6), opacity: 0.45 });
   root.add(lens);
   if (EXPLODED && s < 0) addLabel(lens, 'Waveguide lens', '1–2 mm, carries the image to the eye', new THREE.Vector3(-LX - 6, -10, 0));
   if (EXPLODED && s > 0) addLabel(lens, 'In-coupling grating', 'where projector light enters the waveguide', new THREE.Vector3(LX + LA - 4, 6, 1));
@@ -466,48 +508,50 @@ const ARM_BACK = ex(26);      // pull arms back
 SIDES.forEach(({ s, name, board }) => {
   const xOuter = s * (ARM_X + ARM_T / 2);
   const xInner = s * (ARM_X - ARM_T / 2);
-  const armGroup = new THREE.Group(); armGroup.position.z = -ARM_BACK; root.add(armGroup);
+  const armGroup = new THREE.Group(); armGroup.position.z = -ARM_BACK; root.add(armGroup); armGroups.push(armGroup);
 
   // hinge barrel
   const hinge = cyl(1.4, 12, M.metal, 32); hinge.position.set(s * 71, 14, -15); armGroup.add(hinge);
   if (EXPLODED && s > 0) addLabel(hinge, 'Hinge pin', 'steel barrel, flex wraps around it', new THREE.Vector3(0, 6, 0));
 
-  if (!EXPLODED) {
+  {
+    const solid = new THREE.Group(); armGroup.add(solid);
     const geo = armGeo(ARM_T - 1.6);
     const arm = shadowy(new THREE.Mesh(geo, M.frame));
     placeArm(arm, s, s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X - ARM_T / 2 + 0.8));
-    armGroup.add(arm);
+    solid.add(arm);
     // touchpad inset on right arm outer face
     if (s < 0) {
       const tp = rbox(55, 10.5, 0.5, 0.25, M.touch);
       tp.rotation.y = Math.PI / 2; tp.position.set(xOuter - 0.75, armCenterY(50), -50.5);
-      armGroup.add(tp);
+      solid.add(tp);
     }
     // antenna window band
     const aw = rbox(10, 13.6, ARM_T + 0.9, 0.9, M.antennaWin);
     aw.rotation.y = Math.PI / 2; aw.position.set(s * ARM_X, armCenterY(88), -88);
-    armGroup.add(aw);
+    solid.add(aw);
     // pogo pins under arm
     for (let i = 0; i < 3; i++) {
-      const p = cyl(0.55, 0.6, M.gold, 16); p.position.set(s * ARM_X, 6.25 + 0.0, -58 - i * 2.4); armGroup.add(p);
+      const p = cyl(0.55, 0.6, M.gold, 16); p.position.set(s * ARM_X, 6.25 + 0.0, -58 - i * 2.4); solid.add(p);
     }
     // speaker grille under arm near ear
     const sg = new THREE.Mesh(new THREE.PlaneGeometry(10, 3.2), M.speaker); sg.rotation.x = Math.PI / 2; sg.rotation.z = Math.PI / 2;
-    sg.position.set(s * ARM_X, 6.62 - 0.01 - 0.85, -100); armGroup.add(sg);
-    return;
+    sg.position.set(s * ARM_X, 6.62 - 0.01 - 0.85, -100); solid.add(sg);
+    if (!EXPLODED) return;
+    fade.push(solid);
   }
 
   // ---- exploded arm ----
   const SH = 1.6; // shell plate thickness (before bevel)
   const outerShell = shadowy(new THREE.Mesh(armGeo(SH), M.frame));
   placeArm(outerShell, s, 0);
-  outerShell.position.x = (s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X + ARM_T / 2 - 0.8 - SH)) + s * 78;
+  outerShell.position.x = (s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X + ARM_T / 2 - 0.8 - SH)) + s * ex(78);
   armGroup.add(outerShell);
   addLabel(outerShell, s < 0 ? 'Right arm, outer shell' : 'Left arm, outer shell', 'with plastic antenna window', new THREE.Vector3(120, armCenterY(120) + 2, SH / 2));
 
   const innerShell = shadowy(new THREE.Mesh(armGeo(SH), M.frameInner));
   placeArm(innerShell, s, 0);
-  innerShell.position.x = (s < 0 ? -(ARM_X - ARM_T / 2 + 0.8 + SH) : (ARM_X - ARM_T / 2 + 0.8)) - s * 30;
+  innerShell.position.x = (s < 0 ? -(ARM_X - ARM_T / 2 + 0.8 + SH) : (ARM_X - ARM_T / 2 + 0.8)) - s * ex(30);
   armGroup.add(innerShell);
   if (s > 0) addLabel(innerShell, 'Inner shell', 'skin side, insulated by an air gap', new THREE.Vector3(140, armCenterY(140) - 1, SH), 'L');
   // pogo pins on inner shell
@@ -519,7 +563,7 @@ SIDES.forEach(({ s, name, board }) => {
 
   if (s < 0) {
     const tp = rbox(55, 10.5, 0.6, 0.3, M.touch);
-    tp.rotation.y = Math.PI / 2; tp.position.set(xOuter + s * 104, armCenterY(50), -50.5);
+    tp.rotation.y = Math.PI / 2; tp.position.set(xOuter + s * ex(104), armCenterY(50), -50.5);
     armGroup.add(tp);
     addLabel(tp, 'Touchpad', '55 × 12 mm capacitive strip', new THREE.Vector3(-14, 4, 0.3));
   }
@@ -527,7 +571,7 @@ SIDES.forEach(({ s, name, board }) => {
   // graphite heat spreader (main side only) / thermal pad
   if (board === 'main') {
     const gr = rbox(52, 12, 0.25, 0.1, M.graphite);
-    gr.rotation.y = Math.PI / 2; gr.position.set(xOuter + s * 54, armCenterY(48), -48);
+    gr.rotation.y = Math.PI / 2; gr.position.set(xOuter - s * 1.5 + s * ex(55.5), armCenterY(48), -48);
     armGroup.add(gr);
     addLabel(gr, 'Graphite heat spreader', 'moves SoC heat to the outer shell', new THREE.Vector3(18, -3, 0.2));
   }
@@ -536,7 +580,7 @@ SIDES.forEach(({ s, name, board }) => {
   const out = s < 0 ? -1 : 1; // local +z maps to world +x
   const { g: bg, parts } = buildBoard(board, out);
   bg.rotation.y = Math.PI / 2;
-  bg.position.set(s * 71.3 + s * 32, armCenterY(50), -50);
+  bg.position.set(s * 71.3 + s * ex(32), armCenterY(50), -50);
   armGroup.add(bg);
   if (board === 'main') {
     addLabel(bg, 'Main board', '60 × 13 mm, 10–12 layer HDI, both sides', new THREE.Vector3(24, -5.5, out * 0.4));
@@ -552,20 +596,20 @@ SIDES.forEach(({ s, name, board }) => {
     new THREE.Vector3(s * 68.5, 14, -4), new THREE.Vector3(s * 70, 14, -10), new THREE.Vector3(s * 73.6, 14, -13.5),
     new THREE.Vector3(s * 73.6, 14, -16.5), new THREE.Vector3(s * 71.6, 14, -20.5), new THREE.Vector3(s * 71.4, 14, -26)
   ], 5, M.flex);
-  hf.position.set(s * 8, 26, 4);
+  hf.position.set(s * ex(8), ex(26), ex(4));
   armGroup.add(hf);
   if (s > 0) addLabel(hf, 'Hinge flex', 'loops round the hinge pin, folds without creasing', new THREE.Vector3(s * 73.6, 14, -15));
 
   // antenna
   const ant = buildAntenna(); ant.rotation.y = Math.PI / 2;
-  ant.position.set(s * 71.3 + s * 8, armCenterY(87) + 20, -87);
+  ant.position.set(s * 71.3 + s * ex(8), armCenterY(87) + ex(20), -87);
   armGroup.add(ant);
   if (s < 0) addLabel(ant, 'Antenna', 'LDS trace behind the plastic window', new THREE.Vector3(0, 4, 0));
 
   // speaker
   const sp = buildSpeaker(); sp.rotation.y = Math.PI / 2;
   if (s > 0) sp.rotation.y = -Math.PI / 2;
-  sp.position.set(s * 71.3 + s * 6, armCenterY(100) - 22, -100);
+  sp.position.set(s * 71.3 + s * ex(6), armCenterY(100) - ex(22), -100);
   armGroup.add(sp);
   if (s < 0) addLabel(sp, 'Open-ear speaker', 'aims down at the ear canal', new THREE.Vector3(0, -3.5, 0));
 
@@ -573,18 +617,60 @@ SIDES.forEach(({ s, name, board }) => {
   const bat = buildBattery(); bat.rotation.y = Math.PI / 2;
   if (s < 0) { bat.rotation.y = -Math.PI / 2; }
   bat.userData.label.position.z = 2.82;
-  bat.position.set(s * 71.3 + s * 18, armCenterY(124), -124);
+  bat.position.set(s * 71.3 + s * ex(18), armCenterY(124), -124);
   armGroup.add(bat);
   if (s < 0) addLabel(bat, 'Battery cell', '46 × 10 × 6 mm, ~1.3 Wh, one per arm', new THREE.Vector3(10, 4, 2.8));
 });
+return { root, fade, armGroups };
+}
+
+// ---------- build ----------
+const pivot = new THREE.Group(); pivot.position.z = -80; scene.add(pivot);
+const built = buildAll(MODE === 'exploded' ? 1 : 0);
+const root = built.root; root.position.z = 80; pivot.add(root);
 
 // ---------- ground / shadow ----------
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.ShadowMaterial({ opacity: EXPLODED ? 0.0 : 0.22 }));
-ground.rotation.x = -Math.PI / 2; ground.position.y = EXPLODED ? -60 : -17.5; ground.receiveShadow = true;
+const groundY = MODE === 'exploded' ? -60 : MODE === 'anim' ? -40 : -17.5;
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.ShadowMaterial({ opacity: MODE === 'exploded' ? 0.0 : 0.22 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = groundY; ground.receiveShadow = true;
 scene.add(ground);
+
+// ---------- worn on a mannequin bust ----------
+async function loadMesh(url, mat) {
+  const buf = await (await fetch(url)).arrayBuffer();
+  const [nv, ni] = new Uint32Array(buf, 0, 2);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(buf, 8, nv * 3), 3));
+  geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(buf, 8 + nv * 12, nv * 3), 3));
+  geo.setIndex(new THREE.BufferAttribute(new Uint32Array(buf, 8 + nv * 24, ni), 1));
+  geo.computeVertexNormals();   // smoother than the SDF gradient normals
+  const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+if (MODE === 'worn') {
+  const MODEL = params.get('model') || 'kai';
+  const skinCol = '#' + (params.get('skin') || 'c99a7a'), hairCol = '#' + (params.get('hair') || '2a211c');
+  const skin = new THREE.MeshPhysicalMaterial({ color: skinCol, roughness: 0.78, sheen: 0.25, sheenRoughness: 0.6, sheenColor: new THREE.Color(skinCol).lerp(new THREE.Color('#ffffff'), 0.3), envMapIntensity: 0.7 });
+  const hair = new THREE.MeshPhysicalMaterial({ side: THREE.DoubleSide, color: hairCol, envMapIntensity: 0.7, roughness: 0.8, sheen: 1.0, sheenRoughness: 0.35, sheenColor: new THREE.Color(hairCol).lerp(new THREE.Color('#ffffff'), 0.3) });
+  const bust = new THREE.Group();
+  bust.add(await loadMesh(`bust-${MODEL}-skin.bin`, skin));
+  bust.add(await loadMesh(`bust-${MODEL}-hair.bin`, hair));
+  root.add(bust);
+  // glasses a touch larger and arms a touch shorter to sit on this head
+  root.children.forEach(c => { if (c !== bust) { c.scale.setScalar(1.06); } });
+  built.armGroups.forEach(g => g.scale.z = 0.84);
+  ground.visible = false;
+  key.position.set(-260, 260, 380); key.intensity = 2.0;
+  sc.left = -400; sc.right = 400; sc.top = 400; sc.bottom = -400; sc.far = 1400; sc.updateProjectionMatrix();
+  rim.intensity = 1.8;
+}
 
 // ---------- camera ----------
 let camera;
+function aim(cam, target, dir, dist) {
+  const d = new THREE.Vector3(...dir).normalize().multiplyScalar(dist);
+  cam.position.copy(new THREE.Vector3(...target).add(d)); cam.lookAt(...target);
+}
 if (MODE === 'exploded') {
   camera = new THREE.PerspectiveCamera(24, W / H, 1, 3000);
   camera.position.set(-14 - 526 * 1.1, 12 + 398 * 1.1, -70 + 540 * 1.1);
@@ -594,11 +680,48 @@ if (MODE === 'exploded') {
   camera = new THREE.PerspectiveCamera(15, W / H, 1, 3000);
   camera.position.set(-30, 60, 520);
   camera.lookAt(0, 4, -40);
+} else if (MODE === 'worn') {
+  camera = new THREE.PerspectiveCamera(+params.get('fov') || 20, W / H, 1, 5000);
+  const views = {
+    'three-quarter': [[0, -40, -70], [-0.66, 0.12, 0.75], 1050],
+    'front': [[0, -45, -60], [0.06, 0.04, 1], 1050],
+    'profile': [[0, -40, -80], [-1, 0.06, 0.08], 1050],
+    'close': [[-8, 0, -30], [-0.5, 0.14, 0.86], 560],
+    'low': [[0, -20, -70], [0.45, -0.12, 0.88], 900],
+  };
+  aim(camera, ...(views[VIEW] || views['three-quarter']));
+  if (params.has('ox')) camera.setViewOffset(W, H, +params.get('ox'), +(params.get('oy') || 0), W, H);
+} else if (MODE === 'anim') {
+  camera = new THREE.PerspectiveCamera(22, W / H, 1, 5000);
 } else {
   camera = new THREE.PerspectiveCamera(22, W / H, 1, 3000);
   camera.position.set(-330, 150, 330);
   camera.lookAt(0, 2, -62);
   camera.setViewOffset(W, H, 0, -20, W, H);
+}
+
+// ---------- animation: turntable + explode ----------
+if (MODE === 'anim') {
+  // build a second, fully exploded copy and record where every part ends up
+  const b1 = buildAll(1);
+  const A = [], B = [];
+  root.traverse(o => A.push(o)); b1.root.traverse(o => B.push(o));
+  if (A.length !== B.length) console.log('structure mismatch', A.length, B.length);
+  A.forEach((o, i) => { o.userData.p0 = o.position.clone(); o.userData.p1 = B[i].position.clone(); });
+  built.fade.forEach(g => g.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; } }));
+  const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  window.frame = (t, yaw) => {
+    const e = ease(Math.min(1, Math.max(0, t)));
+    A.forEach(o => { if (o.userData.p0) o.position.lerpVectors(o.userData.p0, o.userData.p1, e); });
+    const op = Math.max(0, 1 - e / 0.1);
+    built.fade.forEach(g => { g.visible = op > 0.01; g.traverse(o => { if (o.isMesh) { o.material.opacity = op; o.castShadow = op > 0.5; } }); });
+    pivot.rotation.y = yaw;
+    ground.material.opacity = 0.22 * (1 - e);
+    aim(camera, [-6 * e, 2 - 8 * e, -70], [-0.55, 0.32 + 0.12 * e, 0.77], 640 + 260 * e);
+    if (params.has('oy')) camera.setViewOffset(W, H, 0, +params.get('oy'), W, H);
+    renderer.render(scene, camera);
+  };
+  window.frame(0, 0);
 }
 
 renderer.render(scene, camera);
@@ -611,8 +734,10 @@ const titles = {
   assembled: ['Aurora smart glasses', 'Assembled: about 65–85 g, both arms carry electronics'],
   front: ['Aurora smart glasses', 'Front view: cameras in the corners, waveguide displays in the lenses'],
 };
+if (!CLEAN) {
 title.innerHTML = `<h1>${titles[MODE][0]}</h1><p>${titles[MODE][1]}</p>`;
 document.getElementById('foot').textContent = 'Concept render from the packaging plan in docs/glasses-packaging.md. Sizes are planning estimates.';
+}
 
 if (labels.length) {
   const svgNS = 'http://www.w3.org/2000/svg';
