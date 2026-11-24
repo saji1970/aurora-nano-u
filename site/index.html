@@ -120,6 +120,16 @@ nav.top.solid .links a:hover { color: var(--ink); }
 .thumbs img { aspect-ratio: 16/10; object-fit: cover; width: 100%; }
 @media (max-width: 700px) { .thumbs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
+/* styles */
+.styles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 48px; }
+.styles figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+.styles img { aspect-ratio: 3 / 2; object-fit: cover; width: 100%; background: #eceae5; }
+.styles figcaption { padding: 16px 20px 20px; }
+.styles figcaption b { display: block; font: 600 20px "Inter Tight", sans-serif; }
+.styles figcaption span { color: var(--ink-3); font-size: 14px; }
+@media (max-width: 980px) { .styles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .styles { grid-template-columns: 1fr; } }
+
 /* on model */
 .models { display: grid; grid-template-columns: 1.25fr 1fr; grid-template-rows: auto auto; gap: 18px; margin-top: 48px; }
 .models figure { margin: 0; position: relative; border-radius: 22px; overflow: hidden; background: var(--bg-2); }
@@ -259,6 +269,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
     <div class="links">
       <a href="#concept">Concept</a>
       <a href="#colours">Colours</a>
+      <a href="#styles">Styles</a>
       <a href="#on-model">On model</a>
       <a href="#design">Design</a>
       <a href="#journey">Roadmap</a>
@@ -339,6 +350,26 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
   </div>
 </section>
 
+<!-- STYLES -->
+<section id="styles" style="padding-top:0;background:var(--bg-2)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Frame styles</div>
+    <h2>Nine shapes, same insides.</h2>
+    <p class="lede">The electronics live in the arms and the hinge blocks, so the front can take whatever shape people already like to wear: acetate, metal wire or a mix of both, with glass lenses that take a prescription, a sun tint or a clear anti-reflection coat. The projector at each hinge and the waveguide in each lens stay the same across every style.</p>
+    <div class="styles">
+      <figure><img src="assets/img/style-square.jpg" alt="Square frame in gloss black" loading="lazy"><figcaption><b>Square</b><span>Obsidian · clear lenses</span></figcaption></figure>
+      <figure><img src="assets/img/style-round.jpg" alt="Round frame in tortoiseshell with amber lenses" loading="lazy"><figcaption><b>Round</b><span>Havana · amber lenses</span></figcaption></figure>
+      <figure><img src="assets/img/style-panto.jpg" alt="Panto frame in translucent smoke" loading="lazy"><figcaption><b>Panto</b><span>Smoke front · graphite arms</span></figcaption></figure>
+      <figure><img src="assets/img/style-rectangular.jpg" alt="Slim rectangular frame in deep blue" loading="lazy"><figcaption><b>Rectangular</b><span>Midnight · clear lenses</span></figcaption></figure>
+      <figure><img src="assets/img/style-aviator.jpg" alt="Aviator with a gold metal front, double bridge and green sun lenses" loading="lazy"><figcaption><b>Aviator</b><span>Gold wire front · green sun lenses</span></figcaption></figure>
+      <figure><img src="assets/img/style-cateye.jpg" alt="Cat-eye frame in tortoiseshell with upswept outer corners" loading="lazy"><figcaption><b>Cat-eye</b><span>Havana · clear lenses</span></figcaption></figure>
+      <figure><img src="assets/img/style-browline.jpg" alt="Browline frame with a black acetate brow over thin silver rims" loading="lazy"><figcaption><b>Browline</b><span>Black brow · silver rims</span></figcaption></figure>
+      <figure><img src="assets/img/style-oversized.jpg" alt="Oversized frame in soft green with amber lenses" loading="lazy"><figcaption><b>Oversized</b><span>Sage · amber lenses</span></figcaption></figure>
+      <figure><img src="assets/img/style-sport.jpg" alt="Sport frame that wraps around the face, with blue lenses" loading="lazy"><figcaption><b>Sport wrap</b><span>Obsidian · blue lenses</span></figcaption></figure>
+    </div>
+  </div>
+</section>
+
 <!-- ON MODEL -->
 <section id="on-model">
   <div class="wrap reveal">
@@ -346,9 +377,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
     <h2>How it sits on a face.</h2>
     <p class="lede">The arms rest on the ears like ordinary glasses. The batteries ride behind the ears to balance the weight of the lenses at the front.</p>
     <div class="models">
-      <figure><img src="assets/img/model-1.jpg" alt="Havana tortoiseshell Aurora glasses with amber lenses on a sculpted bust, three-quarter view" loading="lazy"><figcaption>Havana · amber lenses</figcaption></figure>
+      <figure><img src="assets/img/model-1.jpg" alt="Round Havana tortoiseshell Aurora glasses with amber lenses on a sculpted bust, three-quarter view" loading="lazy"><figcaption>Round · Havana · amber lenses</figcaption></figure>
       <figure><img src="assets/img/model-2.jpg" alt="Glacier white Aurora glasses on a sculpted bust, profile view" loading="lazy"><figcaption>Glacier · clear lenses</figcaption></figure>
-      <figure><img src="assets/img/model-3.jpg" alt="Midnight blue Aurora glasses with sun lenses on a sculpted bust, front view" loading="lazy"><figcaption>Midnight · sun lenses</figcaption></figure>
+      <figure><img src="assets/img/model-3.jpg" alt="Panto Midnight blue Aurora glasses with sun lenses on a sculpted bust, front view" loading="lazy"><figcaption>Panto · Midnight · sun lenses</figcaption></figure>
     </div>
     <p class="note">These are 3D renders on sculpted display busts, built from the same model as the product renders. They stand in for photography of real people wearing prototypes, which can replace them once proof-of-concept frames exist.</p>
   </div>
