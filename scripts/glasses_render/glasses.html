@@ -41,6 +41,7 @@ const CLEAN = params.has('clean') || MODE === 'anim' || MODE === 'worn';   // no
 const COLOR = params.get('color') || 'obsidian';
 const LENS = params.get('lens') || 'clear';
 const VIEW = params.get('view') || 'three-quarter';
+const STYLE = params.get('style') || 'square';      // square | round | panto
 const BG = (params.get('bg') || '').split(',').filter(Boolean).map(c => '#' + c);
 document.body.style.width = W + 'px'; document.body.style.height = H + 'px';
 document.getElementById('wrap').style.cssText = `width:${W}px;height:${H}px`;
@@ -61,7 +62,21 @@ scene.background = (() => { const c = document.createElement('canvas'); c.width 
   const grd = g.createRadialGradient(600, 300, 50, 600, 375, 820); grd.addColorStop(0, b0); grd.addColorStop(0.45, b1); grd.addColorStop(1, b2);
   g.fillStyle = grd; g.fillRect(0, 0, 1200, 750); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+// studio environment: dark room with soft boxes, so gloss and glass pick up long, clean highlights
+function studioEnv() {
+  const s = new THREE.Scene();
+  s.add(new THREE.Mesh(new THREE.BoxGeometry(120, 120, 120), new THREE.MeshBasicMaterial({ color: 0x2a2c30, side: THREE.BackSide })));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshBasicMaterial({ color: 0x8a8c90 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -40; s.add(floor);
+  const panel = (w, h, pos, k) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(k, k, k), side: THREE.DoubleSide })); m.position.set(...pos); m.lookAt(0, 0, 0); s.add(m); };
+  panel(70, 26, [0, 50, 8], 7);        // overhead softbox
+  panel(10, 80, [-50, 8, 24], 5);      // left strip
+  panel(10, 80, [50, 8, -18], 3.5);    // right strip
+  panel(60, 18, [0, 4, 56], 1.6);      // front fill
+  panel(40, 40, [-30, 20, -50], 1.2);  // back kicker
+  return pmrem.fromScene(s, 0.015).texture;
+}
+scene.environment = params.get('env') === 'room' ? pmrem.fromScene(new RoomEnvironment(), 0.04).texture : studioEnv();
 scene.environmentIntensity = 0.9;
 
 // ---------- lights ----------
@@ -155,13 +170,14 @@ const speakerTex = canvasTex(512, 256, (g, w, h) => {
 
 // ---------- materials ----------
 const M = {
-  frame: new THREE.MeshPhysicalMaterial({ color: 0x1d1e22, roughness: 0.32, metalness: 0.0, clearcoat: 0.9, clearcoatRoughness: 0.12, sheen: 0.2 }),
+  // polished acetate: a glossy clear coat over a slightly softer base
+  frame: new THREE.MeshPhysicalMaterial({ color: 0x1d1e22, roughness: 0.28, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.04, ior: 1.49, specularIntensity: 1 }),
   frameInner: new THREE.MeshPhysicalMaterial({ color: 0x26272c, roughness: 0.55, metalness: 0.0, clearcoat: 0.3 }),
   touch: new THREE.MeshPhysicalMaterial({ color: 0x2c2e33, roughness: 0.18, metalness: 0.2, clearcoat: 1.0, clearcoatRoughness: 0.04 }),
   antennaWin: new THREE.MeshPhysicalMaterial({ color: 0x35373c, roughness: 0.6, metalness: 0.0 }),
-  lens: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, metalness: 0, transmission: 0.0, opacity: 0.22, ior: 1.6, depthWrite: false,
-    iridescence: 0.3, iridescenceIOR: 1.35, iridescenceThicknessRange: [180, 420], attenuationColor: new THREE.Color(0xbfd6e6), attenuationDistance: 120,
-    specularIntensity: 1, envMapIntensity: 1.4, transparent: true }),
+  // real glass: refracts what is behind it, with a faint anti-reflection coating sheen
+  lens: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.0, metalness: 0, transmission: 1.0, thickness: 1.6, ior: 1.6,
+    iridescence: 0.35, iridescenceIOR: 1.38, iridescenceThicknessRange: [220, 480], specularIntensity: 1, envMapIntensity: 1.2 }),
   metal: new THREE.MeshPhysicalMaterial({ color: 0xc9ccd1, roughness: 0.28, metalness: 1.0, roughnessMap: brushedTex }),
   darkMetal: new THREE.MeshPhysicalMaterial({ color: 0x55585e, roughness: 0.35, metalness: 1.0 }),
   gold: new THREE.MeshPhysicalMaterial({ color: 0xe2b24f, roughness: 0.25, metalness: 1.0 }),
@@ -198,15 +214,23 @@ const PALETTES = {
   midnight: { frame: 0x1b2a4c, inner: 0x16213a, rough: 0.3, cc: 0.9 },
   sage:     { frame: 0x7d907e, inner: 0x6a7b6b, rough: 0.5, cc: 0.4, touch: 0x5d6b5e },
   blush:    { frame: 0xdcaa9c, inner: 0xc9968a, rough: 0.4, cc: 0.7, touch: 0xb48478 },
+  // clear acetate front; the arms carry electronics so they stay opaque graphite
+  crystal:  { frame: 0xf7f7f5, inner: 0x2c2d31, rough: 0.02, cc: 1.0, clear: 1.0, arm: 0x34363b, touch: 0x2c2e33 },
+  smoke:    { frame: 0x5e5a55, inner: 0x2c2d31, rough: 0.06, cc: 1.0, clear: 0.7, arm: 0x2a2b2f },
 };
 const PAL = PALETTES[COLOR] || PALETTES.obsidian;
 if (PAL.tex) { M.frame.map = PAL.tex; M.frame.color.set(0xffffff); } else M.frame.color.set(PAL.frame);
 M.frame.roughness = PAL.rough; M.frame.clearcoat = PAL.cc;
+M.arm = M.frame;
+if (PAL.clear) {
+  M.arm = M.frame.clone(); M.arm.color.set(PAL.arm); M.arm.roughness = 0.25;
+  Object.assign(M.frame, { transmission: PAL.clear, thickness: 3, attenuationColor: new THREE.Color(PAL.frame), attenuationDistance: 30 });
+}
 M.frameInner.color.set(PAL.inner); M.antennaWin.color.set(PAL.inner);
 if (PAL.touch) M.touch.color.set(PAL.touch);
-const LENSES = { clear: [0xffffff, 0.22], sun: [0x26241f, 0.8], amber: [0x9a5a1c, 0.55], blue: [0x2d4f86, 0.55], rose: [0xc77f86, 0.45] };
-const [lensCol, lensOp] = LENSES[LENS] || LENSES.clear;
-M.lens.color.set(lensCol); M.lens.opacity = lensOp;
+// lens tints, as the colour of the glass (transmission multiplies by it)
+const LENSES = { clear: 0xffffff, sun: 0x3a3732, amber: 0xe3a865, blue: 0x6f92c8, rose: 0xe2a6ac };
+M.lens.color.set(LENSES[LENS] || LENSES.clear);
 
 
 // ---------- helpers ----------
@@ -247,8 +271,15 @@ function chaikin(pts, it = 3) {
 }
 
 // ---------- dimensions (mm) ----------
-const LX = 34, LA = 25, LB = 19;      // lens centre x, half width, half height
-const RIM = 4;
+// lens centre x, half width, half height and superellipse exponents (top, bottom) per frame style
+const STYLES = {
+  square: { LX: 34, LA: 25, LB: 19, n: 3.4, nb: 2.5, rim: 4 },
+  round:  { LX: 31.5, LA: 21, LB: 20, n: 2.05, nb: 2.05, rim: 3.4 },
+  panto:  { LX: 33, LA: 23.5, LB: 19.5, n: 3.0, nb: 1.9, rim: 3.6 },
+};
+const STY = STYLES[STYLE] || STYLES.square;
+const LX = STY.LX, LA = STY.LA, LB = STY.LB;
+const RIM = STY.rim;
 const TOP = LB + RIM;                 // 23
 const ARM_X = 71.5, ARM_T = 6.5;
 
@@ -268,19 +299,42 @@ function frontShape() {
   }
   const pts = chaikin([...bot, ...top.reverse()], 3);
   const shape = new THREE.Shape(pts);
-  [-LX, LX].forEach(cx => shape.holes.push(new THREE.Path(lensPts(cx, 0, LA, LB).reverse())));
+  [-LX, LX].forEach(cx => shape.holes.push(new THREE.Path(lensPts(cx, 0, LA, LB, STY.n, STY.nb).reverse())));
   return shape;
+}
+function buildRings(g) {
+  // each lens gets its own rim, joined by a keyhole bridge and tabs out to the hinge blocks
+  [-1, 1].forEach(s => {
+    const cx = s * LX;
+    const shape = new THREE.Shape(lensPts(cx, 0, LA + RIM, LB + RIM, STY.n, STY.nb, 160));
+    shape.holes.push(new THREE.Path(lensPts(cx, 0, LA, LB, STY.n, STY.nb, 160).reverse()));
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: 3.6, bevelEnabled: true, bevelThickness: 1.2, bevelSize: 1.1, bevelSegments: 8, curveSegments: 96 });
+    geo.translate(0, 0, -1.8);
+    g.add(shadowy(new THREE.Mesh(geo, M.frame)));
+    // tab from the rim to the hinge block
+    const x0 = cx + s * (LA + RIM - 4), x1 = s * 68;
+    const tab = rbox(Math.abs(x1 - x0), 10.5, 5.2, 2.2, M.frame);
+    tab.position.set((x0 + x1) / 2, 14.5, -0.4);
+    g.add(tab);
+  });
+  const bx = LX - LA - 1.2;
+  const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(-bx - 1.5, 9.5, 0), new THREE.Vector3(-bx * 0.5, 12.2, 0.4), new THREE.Vector3(0, 12.8, 0.6),
+    new THREE.Vector3(bx * 0.5, 12.2, 0.4), new THREE.Vector3(bx + 1.5, 9.5, 0)]);
+  const br = shadowy(new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 2.3, 24, false), M.frame));
+  br.scale.z = 1.25; g.add(br);
 }
 function buildFrontFrame() {
   const g = new THREE.Group();
-  const geo = new THREE.ExtrudeGeometry(frontShape(), { depth: 4.2, bevelEnabled: true, bevelThickness: 0.9, bevelSize: 0.9, bevelSegments: 5, curveSegments: 64 });
-  geo.translate(0, 0, -2.1);
-  const m = shadowy(new THREE.Mesh(geo, M.frame));
-  g.add(m);
+  if (STYLE === 'square' || !STYLES[STYLE]) {
+    const geo = new THREE.ExtrudeGeometry(frontShape(), { depth: 4.2, bevelEnabled: true, bevelThickness: 1.1, bevelSize: 1.0, bevelSegments: 8, curveSegments: 96 });
+    geo.translate(0, 0, -2.1);
+    g.add(shadowy(new THREE.Mesh(geo, M.frame)));
+  } else buildRings(g);
   // end pieces / hinge blocks
   [-1, 1].forEach(s => {
-    const e = rbox(9.5, 17.5, 16, 2.6, M.frame);
-    e.position.set(s * 71, 13.8, -6.5);
+    const ringed = STYLE !== 'square' && STYLES[STYLE];
+    const e = ringed ? rbox(8.5, 13.5, 14, 3.2, M.arm) : rbox(9.5, 17.5, 16, 2.6, M.arm);
+    e.position.set(s * 71, ringed ? 14.2 : 13.8, ringed ? -7.2 : -6.5);
     g.add(e);
   });
   // nose pads
@@ -295,7 +349,7 @@ function buildFrontFrame() {
 }
 
 function buildLens(cx) {
-  const shape = new THREE.Shape(lensPts(cx, 0, LA + 0.9, LB + 0.9));
+  const shape = new THREE.Shape(lensPts(cx, 0, LA + 0.9, LB + 0.9, STY.n, STY.nb));
   const geo = new THREE.ExtrudeGeometry(shape, { depth: 1.4, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 3, curveSegments: 64 });
   geo.translate(0, 0, -0.7);
   const m = new THREE.Mesh(geo, M.lens);
@@ -495,7 +549,8 @@ if (EXPLODED) addLabel(front, 'Front frame', 'acetate-over-metal, end pieces hol
     new THREE.Vector3(0, 19.6, -3.4), new THREE.Vector3(20, 20.5, -3.4), new THREE.Vector3(60, 20, -3.4), new THREE.Vector3(66, 17, -6)
   ], 3.2, M.flex);
   ff.position.set(0, ex(62), ex(-6));
-  root.add(ff);
+  // on the rimmed styles the flex runs hidden inside the brow, so only show it when exploded
+  if (STYLE === 'square' || EXPLODED) root.add(ff);
   if (EXPLODED) addLabel(ff, 'Frame flex', 'display, camera and board-to-board link', new THREE.Vector3(22, 20.5, -3.4));
 }
 
@@ -517,7 +572,7 @@ SIDES.forEach(({ s, name, board }) => {
   {
     const solid = new THREE.Group(); armGroup.add(solid);
     const geo = armGeo(ARM_T - 1.6);
-    const arm = shadowy(new THREE.Mesh(geo, M.frame));
+    const arm = shadowy(new THREE.Mesh(geo, M.arm));
     placeArm(arm, s, s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X - ARM_T / 2 + 0.8));
     solid.add(arm);
     // touchpad inset on right arm outer face
@@ -543,7 +598,7 @@ SIDES.forEach(({ s, name, board }) => {
 
   // ---- exploded arm ----
   const SH = 1.6; // shell plate thickness (before bevel)
-  const outerShell = shadowy(new THREE.Mesh(armGeo(SH), M.frame));
+  const outerShell = shadowy(new THREE.Mesh(armGeo(SH), M.arm));
   placeArm(outerShell, s, 0);
   outerShell.position.x = (s < 0 ? -(ARM_X + ARM_T / 2 - 0.8) : (ARM_X + ARM_T / 2 - 0.8 - SH)) + s * ex(78);
   armGroup.add(outerShell);
