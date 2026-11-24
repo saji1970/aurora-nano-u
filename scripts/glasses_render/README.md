@@ -11,7 +11,8 @@ pick what it draws:
 | `color` | `obsidian`, `glacier`, `havana`, `midnight`, `sage`, `blush`, plus translucent `crystal` and `smoke` fronts |
 | `metal` | wire parts on aviator and browline: `gold`, `silver`, `gunmetal` |
 | `lens` | `clear`, `sun`, `g15`, `amber`, `blue`, `rose` (glass with real refraction) |
-| `cam` | `gallery` for the gentle three-quarter used in the style gallery |
+| `cam` | `gallery` for the gentle three-quarter used in the style gallery; `corner` for the close-up of the 12 MP camera and privacy LED |
+| `ledoff` | draw the privacy LED unlit |
 | `env` | `room` for the old neutral lighting; default is the studio soft-box environment |
 | `w`, `h` | image size in pixels (default 2400 × 1500) |
 | `clean` | leave out the title and labels |
@@ -26,6 +27,8 @@ npx http-server -p 8765 -s . &
 
 # documentation renders (docs/images/glasses-render-*.png)
 node shot.js assembled exploded front
+node shot2.js ../../docs/images/glasses-render-camera.png "mode=assembled&clean&cam=corner&w=1600&h=1000"
+node shot2.js stills/camera.png "mode=assembled&clean&cam=corner&w=1800&h=1125&bg=34363c,1d1f23,0d0e10"
 
 # sculpted busts for the on-model shots (writes bust-*.bin, not committed)
 python3 make_bust.py

@@ -6,23 +6,25 @@ This estimates what it costs to take the Aurora glasses from the [main-board des
 
 | | Low | High |
 | --- | --- | --- |
-| One-time development cost (engineering, prototypes, tooling, certification, 20% contingency) | **about $3.5M** | **about $10M** |
+| One-time development cost (engineering, prototypes, tooling, certification, 20% contingency) | **about $4M** | **about $11.2M** |
 | Time from start to first shipments | 18 months | 30 months |
 | Parts and assembly per unit, prototype builds (10–100 units) | $2,000 | $4,500 |
-| Parts and assembly per unit, volume (10,000–100,000 units) | $500 | $850 |
+| Parts and assembly per unit, volume (10,000–100,000 units) | $505 | $855 |
 | Likely retail price at a normal 2.5–3× markup on volume cost | $1,300 | $2,500 |
 
-Dropping standalone 5G (pairing with a phone over Bluetooth and Wi-Fi instead) cuts the one-time cost to about **$2.5M–6M** and the volume unit cost by about **$70–110** (modem, RF front end and cellular royalties).
+Dropping standalone 5G (pairing with a phone over Bluetooth and Wi-Fi instead) cuts the one-time cost to about **$3M–7M** and the volume unit cost by about **$70–110** (modem, RF front end and cellular royalties).
+
+The estimate includes the [camera system](glasses-camera.md) (12 MP camera, privacy LED, tracking camera) and the [Android OS and apps plan](glasses-software-platform.md) (store, SDK, launch apps).
 
 These are planning ranges, not quotes. They come from typical industry rates for phone and wearable programs, published certification costs, and teardown cost shares of similar glasses. Real numbers depend on volume commitments, which suppliers agree to work with you, and how many prototype rounds the design needs. Every number should be replaced by a quote before it is used to raise money or sign a contract.
 
 ## Assumptions
 
-- **The product is the one in the existing docs:** Snapdragon XR2 Gen 2-class SoC, 16 GB LPDDR5X, 256 GB UFS 4.0, two full-color microLED projectors with waveguides, temple touchpad, 5G sub-6 GHz modem, Wi-Fi 7 and Bluetooth, cameras, two arm batteries, two rigid boards joined by flex.
+- **The product is the one in the existing docs:** Snapdragon XR2 Gen 2-class SoC, 16 GB LPDDR5X, 256 GB UFS 4.0, two full-color microLED projectors with waveguides, a 12 MP camera with a hardware privacy LED and a tracking camera, temple touchpad, 5G sub-6 GHz modem, Wi-Fi 7 and Bluetooth, cameras, two arm batteries, two rigid boards joined by flex.
 - **The Aurora-Nano chip is not in the first product.** The 130 nm Aurora-Nano-U in this repository is a teaching tapeout, and the 3 nm glasses version is a design target. A 3 nm tapeout alone costs tens of millions of dollars, so it is left out here and the SoC's own NPU runs the AI. The board can keep a footprint for it for a later version.
 - **Sold in the US and EU first**, with US carrier approval on one to three networks.
 - **Built by a contract manufacturer or ODM**, not in your own factory.
-- **Software is Android (AOSP) on Qualcomm's board support package**, with your own launcher and apps, not a new operating system.
+- **Software is Android (AOSP) on Qualcomm's board support package**, with your own launcher, store and apps, not a new operating system; Google's Android XR is pursued in parallel ([software plan](glasses-software-platform.md)).
 - **Prices are late-2026 US dollars.** Memory prices were high through 2025–2026, so the memory lines may move the most.
 
 ## One-time development cost (NRE)
@@ -33,14 +35,15 @@ These are planning ranges, not quotes. They come from typical industry rates for
 | Electronics and PCB design | schematics, 10–12 layer HDI layout of both boards, rigid-flex, signal and power integrity | $400k | $1.0M |
 | RF and antenna design | antennas in the frame for 5G, Wi-Fi, Bluetooth and GPS, tuning, SAR (radio exposure to the head) optimisation | $150k | $400k |
 | Optics integration | projector-to-waveguide alignment, display calibration, eye-box and brightness tuning | $300k | $1.0M |
-| Software | Android board bring-up, display, camera, touch and audio drivers, power and thermal tuning, launcher, apps, over-the-air updates. About 8–15 engineers for 12–18 months, and the largest single cost | $1.0M | $3.0M |
+| Software | Android board bring-up, display, camera, touch and audio drivers, power and thermal tuning, launcher, over-the-air updates, plus the app store, developer SDK and ten launch apps ([software plan](glasses-software-platform.md)). About 10–17 engineers for 12–18 months, and the largest single cost | $1.3M | $3.6M |
+| Camera tuning and test | image-quality tuning of the camera ISP for the chosen sensor and lens; factory camera test fixtures ([camera](glasses-camera.md#cost)) | $150k | $400k |
 | Program management, quality and reliability testing | drop, sweat, bend, hinge-cycle and battery tests; supplier management | $200k | $500k |
 | Prototype builds | three build rounds (EVT, DVT, PVT) of 20–100 units each, at prototype unit costs | $200k | $700k |
 | Production tooling | injection molds for the frame and arms, hinge tooling, custom battery cell tooling, test and assembly fixtures | $150k | $500k |
 | Certification | see the next table | $250k | $900k |
-| **Subtotal** | | **$2.9M** | **$8.6M** |
-| Contingency, 20% | at least one extra board or optics spin is normal for a first product | $0.6M | $1.4M |
-| **Total** | | **about $3.5M** | **about $10M** |
+| **Subtotal** | | **$3.35M** | **$9.6M** |
+| Contingency, 20% | at least one extra board or optics spin is normal for a first product | $0.65M | $1.6M |
+| **Total** | | **about $4M** | **about $11.2M** |
 
 ### Certification
 
@@ -75,14 +78,14 @@ Prototype prices assume buying tens of parts through a design house or as sample
 | Wi-Fi 7 + Bluetooth combo | $15–25 | $8–12 |
 | Two full-color microLED projectors | $300–800 | $80–160 |
 | Two waveguides | $400–1,500 | $60–150 |
-| Cameras (RGB + tracking) | $20–40 | $10–20 |
+| Cameras: 12 MP RGB, tracking camera, privacy LED ([camera](glasses-camera.md#cost)) | $32–61 | $14–22 |
 | Audio, sensors, touchpad | $20–35 | $10–15 |
 | Two custom battery cells with protection | $20–40 | $6–10 |
 | Boards: two HDI rigid boards, hinge and frame flexes | $150–400 | $25–45 |
 | Frame, hinges, lenses, heat spreaders (CNC or 3D-printed at prototype, molded at volume) | $200–500 | $15–30 |
 | Assembly, optical alignment, test, packaging | $150–300 | $15–30 |
 | Charging case and cable | $30–60 | $8–15 |
-| **Total** | **about $2,000–4,500** | **about $500–850** |
+| **Total** | **about $2,000–4,500** | **about $505–855** |
 
 The display system (projectors plus waveguides) is the biggest cost, as it is in shipping display glasses: teardown analysis puts display parts at about 51% of Meta Ray-Ban Display's bill of materials and Qualcomm parts at about 16% ([TechInsights](https://www.techinsights.com/blog/meta-ray-ban-display-teardown-reveals-more-meets-eye)). Two ways to cut it: a single display in one eye (as Meta does), or monochrome green microLED, which costs a fraction of full color.
 

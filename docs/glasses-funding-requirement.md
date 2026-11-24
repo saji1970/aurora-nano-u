@@ -1,37 +1,41 @@
 # Aurora glasses: funding requirement
 
-This is the funding case for taking the Aurora smart glasses from concept to a first production run of 5,000 units. It turns the [cost and sourcing estimate](glasses-cost-and-sourcing.md) into a staged ask with use of funds, milestones, team, unit economics and risks. The technical design behind it is in the [main-board design](glasses-board.md) and the [packaging plan](glasses-packaging.md).
+This is the funding case for taking the Aurora smart glasses from concept to a first production run of 5,000 units. It turns the [cost and sourcing estimate](glasses-cost-and-sourcing.md) into a staged ask with use of funds, milestones, team, unit economics and risks. The technical design behind it is in the [main-board design](glasses-board.md), the [packaging plan](glasses-packaging.md), the [camera system](glasses-camera.md) and the [Android OS and apps plan](glasses-software-platform.md).
 
 ![Aurora glasses, assembled concept render](images/glasses-render-assembled.png)
 
 ## The ask
 
-**About $16M in total, raised in three stages over about 30 months.** Each stage is released only when the stage before hits its milestones, so investors fund the next risk only after the last one is retired.
+**About $17.7M in total, raised in three stages over about 30 months.** Each stage is released only when the stage before hits its milestones, so investors fund the next risk only after the last one is retired.
 
 | Stage | Amount | Months | What it proves |
 | --- | --- | --- | --- |
 | 1. Pre-seed | **$650k** | 0–6 | The display, apps, battery life and heat work on a working proof of concept, and an ODM will build it |
-| 2. Seed | **$3.2M** | 6–15 | Custom engineering prototypes (EVT) work end to end and pilot users want them |
-| 3. Series A | **$12.4M** | 15–30 | The product passes certification, the factory line yields, and the first 5,000 units ship |
-| **Total** | **$16.25M** | 30 | |
+| 2. Seed | **$3.4M** | 6–15 | Custom engineering prototypes (EVT) work end to end, the camera is tuned, and pilot users want them |
+| 3. Series A | **$13.65M** | 15–30 | The product passes certification, the app store and launch apps are live, the factory line yields, and the first 5,000 units ship |
+| **Total** | **$17.7M** | 30 | |
 
-The realistic range for the full plan is **$12M–20M**, depending on supplier quotes, team location and how many prototype rounds are needed. A leaner version that pairs with a phone instead of carrying its own 5G costs about **$10M** (see [A leaner path](#a-leaner-path-about-10m)).
+The realistic range for the full plan is **$13M–22M**, depending on supplier quotes, team location and how many prototype rounds are needed. A leaner version that pairs with a phone instead of carrying its own 5G costs about **$11M** (see [A leaner path](#a-leaner-path-about-11m)).
+
+**What changed with the camera and app platform.** Adding the [camera system](glasses-camera.md) and the [Android OS and apps plan](glasses-software-platform.md) raised the ask from $16.25M to $17.7M (+$1.45M): $200k in the seed (camera tuning, development kits and Android XR engagement) and $1.25M in the Series A (a camera engineer and a developer-platform engineer, the app store and SDK, launch-app licences and a developer fund, camera test fixtures, about $5 more per unit in the first run, and contingency).
 
 All figures are planning estimates built from typical industry rates, not quotes. Replace each with a real quote before sending this to investors (see [Before you send this](#before-you-send-this)).
 
 ## The product
 
-Aurora is a pair of standalone display glasses: Android apps on a full-color microLED display in each lens, cameras, a temple touchpad, 5G, Wi-Fi and Bluetooth, with on-device AI.
+Aurora is a pair of standalone display glasses: Android apps on a full-color microLED display in each lens, a 12 MP camera with a hardware privacy LED, a temple touchpad, 5G, Wi-Fi and Bluetooth, with on-device AI.
 
 | | |
 | --- | --- |
 | Processor | Qualcomm Snapdragon XR2 Gen 2-class, 16 GB memory, 256 GB storage |
 | Display | two full-color microLED projectors with waveguide lenses |
+| Camera | 12 MP RGB with hardware privacy LED, plus a tracking camera for hand tracking |
+| Software | Android (AOSP) with the Aurora launcher, store and ten launch apps; Android XR pursued with Google |
 | Connectivity | 5G sub-6 GHz, Wi-Fi 7, Bluetooth 5.4 |
 | Weight | about 65–85 g (target to bring down) |
 | Battery | about 2.7 Wh across two cells, one in each arm |
 | Target retail price | about $1,500 |
-| Volume unit cost | about $500–850 |
+| Volume unit cost | about $505–855 |
 
 ![Exploded view of the glasses with each part labeled](images/glasses-render-exploded.png)
 
@@ -56,7 +60,7 @@ The longer-term difference is the **Aurora-Nano** chip from this repository: a 2
 - Signed quotes or a letter of intent from at least one ODM (for example Goertek or Thundercomm) and access to Qualcomm's reference design.
 - First patent applications filed.
 
-## Stage 2: Seed, $3.2M, months 6–15
+## Stage 2: Seed, $3.4M, months 6–15
 
 | Use of funds | Amount |
 | --- | --- |
@@ -65,34 +69,39 @@ The longer-term difference is the **Aurora-Nano** chip from this repository: a 2
 | Two engineering-prototype (EVT) builds, about 50 units each | $300k |
 | Display and optics samples, lab and test equipment | $150k |
 | Pre-compliance radio and SAR testing | $60k |
+| Camera image-quality tuning with the ODM or a tuning lab | $150k |
+| Development kits, Android XR programme engagement | $50k |
 | Software tools, licenses, cloud | $60k |
 | Office, operations, legal, insurance | $100k |
 | Contingency | $300k |
-| **Total** | **$3.2M** |
+| **Total** | **$3.4M** |
 
 **Milestones to unlock the Series A**
 
-- EVT units working end to end: display, touch, cameras, audio, Wi-Fi, Bluetooth and 5G (if kept) on the custom boards.
+- EVT units working end to end: display, touch, the tuned camera and privacy LED, audio, Wi-Fi, Bluetooth and 5G (if kept) on the custom boards.
 - Battery life and surface temperature within target on EVT units.
 - Pre-compliance radio and SAR scans passed, so certification is low risk.
 - 50 or more units in pilot users' hands, with usage data.
 - Demand evidence: pre-orders, a waitlist, or letters of intent from business customers.
 
-## Stage 3: Series A, $12.4M, months 15–30
+## Stage 3: Series A, $13.65M, months 15–30
 
 | Use of funds | Amount |
 | --- | --- |
-| Team: about 16 people on average for 15 months | $4.08M |
+| Team: about 18 people on average for 15 months (including a camera engineer and a developer-platform engineer) | $4.59M |
 | ODM engineering for design and production validation (DVT, PVT) and line setup | $600k |
 | DVT and PVT builds, about 300 units | $450k |
 | Production tooling: molds, hinges, battery tooling, test fixtures | $350k |
 | Certification: FCC, CE, PTCRB/GCF, two US carriers, battery and eye safety, Bluetooth and Wi-Fi | $600k |
 | Reliability testing: drop, sweat, hinge-cycle, battery | $150k |
-| First production run: 5,000 units at about $750 each | $3.75M |
+| Camera factory test fixtures | $50k |
+| Aurora Store, developer console and SDK | $300k |
+| Launch-app licences (maps, speech, translation, cloud AI) and developer fund | $250k |
+| First production run: 5,000 units at about $755 each | $3.78M |
 | Launch and marketing | $1.0M |
 | Operations, legal, insurance, customer support setup | $300k |
-| Contingency | $1.12M |
-| **Total** | **$12.4M** |
+| Contingency | $1.23M |
+| **Total** | **$13.65M** |
 
 The first production run is about a third of this stage. Part of it can be covered by pre-order cash, ODM payment terms or inventory financing, which would reduce the equity needed by up to about $3M.
 
@@ -100,23 +109,23 @@ The first production run is about a third of this stage. Part of it can be cover
 
 - All launch certifications granted (US and EU, at least one US carrier).
 - Factory yield above 90% at PVT.
-- First 5,000 units shipped to customers.
+- First 5,000 units shipped to customers, with the Aurora Store and ten launch apps live.
 - Unit cost on a path to under $650 at the next order size.
 
 ## How this compares with the development cost estimate
 
-The [cost estimate](glasses-cost-and-sourcing.md) puts one-time development at $3.5M–10M. This ask is larger because it also pays for things a development budget leaves out:
+The [cost estimate](glasses-cost-and-sourcing.md) puts one-time development at $4M–11.2M. This ask is larger because it also pays for things a development budget leaves out:
 
 | | Amount in this plan |
 | --- | --- |
-| Development: engineering team, ODM engineering, prototypes, tooling, certification, testing, tools | about $9.6M |
-| Contingency across all three stages | about $1.5M |
-| First 5,000 units of inventory | $3.75M |
+| Development: engineering team, ODM engineering, prototypes, tooling, certification, testing, camera tuning, app store, SDK and launch apps | about $10.9M |
+| Contingency across all three stages | about $1.6M |
+| First 5,000 units of inventory | $3.78M |
 | Launch and marketing | $1.0M |
 | Company running costs (office, legal, insurance, support) | about $0.5M |
-| **Total** | **about $16.25M** |
+| **Total** | **about $17.7M** |
 
-The development part, with its contingency, sits at the top of the $3.5M–10M range because this plan budgets a full in-house team for 30 months rather than relying mostly on an ODM's reused design.
+The development part, with its contingency, sits at the top of the $4M–11.2M range because this plan budgets a full in-house team for 30 months rather than relying mostly on an ODM's reused design.
 
 ## Team and hiring plan
 
@@ -129,10 +138,12 @@ The development part, with its contingency, sits at the top of the $3.5M–10M r
 | Mechanical and industrial design | (shared with optics) | 1 | 2 |
 | Android platform and driver engineers | 1 | 3 | 4 |
 | App and AI engineers | | 2 | 3 |
+| Camera and imaging engineer | | | 1 |
+| Developer platform, store and developer relations | | | 1 |
 | Supply chain and manufacturing lead | | 1 | 1 |
 | Quality, test and certification | | | 1 |
 | Marketing, sales and support | | | 2 |
-| **Headcount at end of stage** | **4** | **12** | **20** |
+| **Headcount at end of stage** | **4** | **12** | **22** |
 
 Team costs assume an average of about $17k per person per month fully loaded (salary, benefits, taxes, equipment), a mix of US and lower-cost locations. An all-US team in a high-cost city would add about 30–50% to the team lines; a team based mostly in Asia or Eastern Europe could cut them by a similar amount.
 
@@ -141,8 +152,8 @@ Team costs assume an average of about $17k per person per month fully loaded (sa
 | Stage | Monthly spend (average) | Runway |
 | --- | --- | --- |
 | Pre-seed | about $110k | 6 months |
-| Seed | about $355k | 9 months |
-| Series A | about $830k (about $510k excluding inventory and launch) | 15 months |
+| Seed | about $380k | 9 months |
+| Series A | about $910k (about $590k excluding inventory and launch) | 15 months |
 
 Start raising each next stage at least 4–6 months before the current one runs out. Hardware milestones often slip by a quarter, and the contingency lines are sized to cover about one slip per stage.
 
@@ -153,15 +164,15 @@ At a $1,499 retail price and the volume cost from the [estimate](glasses-cost-an
 | Per unit | Sold direct (own website) | Sold through retailers |
 | --- | --- | --- |
 | Revenue to the company | $1,454 (after about 3% card fees) | about $1,050 (retailer keeps about 30%) |
-| Parts and assembly | $650 | $650 |
+| Parts and assembly | $655 | $655 |
 | Cellular patent royalties | $15 | $15 |
 | Packaging, freight, duties | $25 | $25 |
 | Warranty and returns reserve (about 3% of price) | $45 | $45 |
-| **Gross profit** | **about $720 (49%)** | **about $315 (30%)** |
+| **Gross profit** | **about $715 (49%)** | **about $310 (30%)** |
 
-The first 5,000 units cost more (about $750 each), which lowers the first-run margin to about 42% direct and 21% retail. Consumer electronics companies typically aim for 35–50% gross margin, so a direct-first launch fits; retail needs the unit cost brought down first.
+The first 5,000 units cost more (about $755 each), which lowers the first-run margin to about 42% direct and 20% retail. Consumer electronics companies typically aim for 35–50% gross margin, so a direct-first launch fits; retail needs the unit cost brought down first.
 
-**Break-even.** After launch the company spends about $430k a month to run (a team of 20 plus operations). At an average of about $500 gross profit per unit across direct and retail sales, it breaks even at about **900 units a month**, about 10,000–11,000 units a year.
+**Break-even.** After launch the company spends about $475k a month to run (a team of 22, operations, and cloud AI, maps and store services). At an average of about $500 gross profit per unit across direct and retail sales, it breaks even at about **950 units a month**, about 11,000–12,000 units a year.
 
 ## Risks and how this plan handles them
 
@@ -172,22 +183,24 @@ The first 5,000 units cost more (about $750 each), which lowers the first-run ma
 | Qualcomm access | Qualcomm sells XR chips only to approved customers under NDA | work through an ODM or design house that already holds access; this is a pre-seed milestone |
 | Display supply and cost | projectors and waveguides are about half the parts cost and have limited suppliers | evaluate two waveguide suppliers early; keep a single-eye or monochrome option |
 | Certification | head-worn radios face strict SAR limits; carrier approval is slow | pre-compliance scans in the seed stage; 5G carrier approval can follow launch |
+| No Google Play | Google's Android XR is by partnership only, and without it there is no Play Store | the [software plan](glasses-software-platform.md) is built on AOSP with its own store and licensed maps, speech and AI; Android XR is pursued as an upside |
+| Camera privacy | camera glasses draw public and regulatory concern | a hardware privacy LED that software cannot turn off, a covered-LED check, no face recognition of strangers, store review rules ([camera](glasses-camera.md#privacy-led-a-hardware-rule-not-a-setting)) |
 | Competition | large companies sell display glasses (Meta Ray-Ban Display at $799) | differentiate on standalone apps, on-device AI and later the Aurora-Nano chip; target a niche such as business or accessibility users first |
 | Schedule slip | first hardware products usually need an extra prototype round | contingency in every stage; each stage gated on milestones |
 | Tariffs and supply chain | most glasses suppliers are in China | ODMs with Vietnam sites; Jabil or Flex as a US or Mexico option |
 
-## A leaner path, about $10M
+## A leaner path, about $11M
 
 If the glasses pair with a phone instead of carrying their own 5G, use the glasses-specific Snapdragon AR1+ processor, and are built on an ODM's reference design, the plan shrinks:
 
 | Stage | Full plan | Lean plan |
 | --- | --- | --- |
 | Pre-seed | $650k | $650k |
-| Seed | $3.2M | about $2.5M |
-| Series A | $12.4M | about $7M |
-| **Total** | **about $16.25M** | **about $10M** |
+| Seed | $3.4M | about $2.7M |
+| Series A | $13.65M | about $7.6M |
+| **Total** | **about $17.7M** | **about $11M** |
 
-The savings come from a smaller team (about 12 instead of 20 at launch), no cellular certification, no modem or cellular royalties, and a cheaper unit (about $450 instead of $750 at first run). The trade-off is that the glasses need a phone nearby for internet when away from Wi-Fi.
+The lean plan keeps the camera and the app platform. The savings come from a smaller team (about 13 instead of 22 at launch), no cellular certification, no modem or cellular royalties, and a cheaper unit (about $455 instead of $755 at first run). The trade-off is that the glasses need a phone nearby for internet when away from Wi-Fi.
 
 ## Where the money can come from
 
