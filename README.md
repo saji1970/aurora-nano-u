@@ -13,7 +13,7 @@ Android SoC, memory, displays, 5G and power around it, and the
 adds a 12 MP camera with a hardware privacy LED, and the [Android OS and apps plan](docs/glasses-software-platform.md)
 covers the software, app store and launch apps. The [cost and sourcing estimate](docs/glasses-cost-and-sourcing.md)
 covers development cost, unit cost, suppliers and manufacturers. The [funding requirement](docs/glasses-funding-requirement.md)
-turns it into a staged investment ask.
+turns it into a staged investment ask. The [build package](docs/glasses-build-package.md) is the place to start building: a proof-of-concept parts list with costs and suppliers, pin-level connections, sizes, OS bring-up and a phased plan, with a [starter launcher app](apps/aurora-launcher/README.md).
 
 ## What the chip does
 

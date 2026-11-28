@@ -124,7 +124,7 @@ Most ODMs want a minimum order of about **10,000–50,000 units** and an NRE pay
 
 | Phase | What happens | Rough cost | Time |
 | --- | --- | --- | --- |
-| 0. Proof of concept | Qualcomm development kit or a design house's XR board, plus a waveguide and projector evaluation kit on a 3D-printed frame. Proves the display, apps and battery life before any custom board | $50k–150k | 3–4 months |
+| 0. Proof of concept | Qualcomm development kit or a design house's XR board, plus a waveguide and projector evaluation kit on a 3D-printed frame. Proves the display, apps and battery life before any custom board. A cheaper first step, an off-the-shelf Android AR-glasses board from a Shenzhen ODM for about $8k–25k, is costed in the [build package](glasses-build-package.md#2-poc-bill-of-materials) | $50k–150k | 3–4 months |
 | 1. Pick the path | Answer the [open questions](glasses-board.md#open-questions): standalone 5G or phone pairing, 16 or 8 GB, XR2 Gen 2 or AR1+. Get quotes from two or three ODMs | — | 1 month |
 | 2. Engineering prototypes (EVT) | custom boards and frame, first software | $1M–3M | 6–9 months |
 | 3. Design and production validation (DVT, PVT) | fixes, tooling, reliability tests, certification | $1.5M–5M | 6–12 months |

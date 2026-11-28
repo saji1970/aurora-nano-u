@@ -72,14 +72,14 @@ box(1280, 400, 1560, 480, "Aurora-Nano NPU", ["optional LLM co-processor"])
 box(40, 560, 320, 660, "RF front end", ["PA, LNA, filters, tuners", "antennas in the frame"])
 box(380, 560, 820, 660, "5G modem-RF", ["Snapdragon X75-class", "sub-6 GHz + mmWave, eSIM"])
 box(880, 560, 1220, 660, "Wi-Fi 7 + Bluetooth 5.4", ["phone tether, accessories"])
-box(1280, 560, 1560, 660, "Audio + sensors", ["mics, speakers, IMU", "ambient light, proximity"])
+box(1280, 560, 1560, 660, "Audio + sensors", ["mics, speakers, IMU, compass,", "barometer, light, GPS, buttons"])
 
 # Row D: power
 out.append(f'<rect x="40" y="720" width="1520" height="190" rx="12" fill="#f6f8f3" '
            f'stroke="{LINE}" stroke-width="1.5" stroke-dasharray="6 5"/>')
 text(60, 748, "Power and battery", 15, 700, "#3d6b2a", "start")
 box(60, 765, 260, 885, "USB-C", ["or pogo pins", "5–9 V input"])
-box(290, 765, 540, 885, "Charger IC", ["USB PD, 1–2 A", "JEITA temp. limits"])
+box(290, 765, 540, 885, "Charger IC", ["up to 2 A, 50% in 15 min", "JEITA temp. limits"])
 box(570, 765, 780, 885, "Battery", ["Li-ion, 2 cells", "in the temples", "fuel gauge + protection"])
 box(810, 765, 1150, 885, "PMIC + companion PMIC", ["~20 buck / LDO rails", "for every block above"])
 box(1180, 765, 1540, 885, "Thermal guard", ["skin-temperature sensors", "SoC throttles at the limit"])
