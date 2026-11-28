@@ -70,7 +70,7 @@ All prices are late-2026 planning estimates for buying one to three of each part
 | B23 | Thermal camera for heat measurement | InfiRay P2 Pro or Topdon TC001 class | 1 | $200–300 | Amazon |
 | B24 | Fine soldering iron, hot-air station, microscope, USB-UART adapter, calipers | | 1 set | $300–800 | Amazon, Digi-Key |
 | B25 | Linux build machine for Android (16+ cores, 64 GB RAM, 1 TB SSD), or a cloud instance | | 1 | $0–2,500 | |
-| | **Parts for one pair (B1, B4–B21)** | | | **about $1.5k–3.5k** | |
+| | **Parts for one pair (B1, B4–B21)** | | | **about $1.2k–3.5k** | |
 | | **Parts for three pairs with spares** | | | **about $4k–8k** | |
 | | **Plus ODM BSP and support (B2–B3), tools (B22–B25)** | | | **about $1k–14k** | |
 | | **Route B total** | | | **about $8k–25k** including a mechanical designer for a few weeks | |
