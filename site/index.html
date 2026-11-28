@@ -261,6 +261,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
 .app b { font-size: 15px; }
 .app span { font-size: 13px; color: var(--ink-3); line-height: 1.45; }
 .apps-sec table.plain td:first-child { padding-right: 16px; }
+#build table.plain td, #build table.plain th { padding-right: 16px; }
+#build table.plain td.num, #build table.plain th.num { white-space: nowrap; padding-right: 24px; }
 @media (max-width: 980px) { .applist { grid-template-columns: repeat(3, minmax(0, 1fr)); } .adapt, .tiers { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .applist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
@@ -295,6 +297,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
       <a href="#camera">Camera</a>
       <a href="#apps">Apps</a>
       <a href="#journey">Roadmap</a>
+      <a href="#build">Build</a>
       <a href="#funding">Funding</a>
     </div>
   </div>
@@ -597,10 +600,43 @@ footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wr
   </div>
 </section>
 
+<!-- BUILD -->
+<section id="build" style="background:var(--bg-2)">
+  <div class="wrap reveal">
+    <div class="eyebrow">10 · Build the first pair</div>
+    <h2>A wearable proof of concept<br>for $8k–25k.</h2>
+    <p class="lede">Before any custom board, a ready-made Android AR-glasses board from a Shenzhen maker goes into a 3D-printed frame with two micro-OLED displays, cameras and batteries. It proves the apps, battery life and heat on a real head in about four months.</p>
+    <div class="tiles">
+      <div class="tile"><div class="label">A · Tethered app POC</div><div class="value">$1.5–4k</div><div class="sub">display glasses on a cable to a phone; app work starts in weeks</div></div>
+      <div class="tile"><div class="label">B · ODM-board POC</div><div class="value">$8–25k</div><div class="sub">standalone pair on the head in 2–4 months (recommended)</div></div>
+      <div class="tile"><div class="label">C · Qualcomm reference</div><div class="value">$50–150k</div><div class="sub">production chip, microLED and waveguide kits, needs an NDA</div></div>
+      <div class="tile"><div class="label">Parts for one pair (B)</div><div class="value">$1.2–3.5k</div><div class="sub">the rest is source code access, tools and frame design</div></div>
+    </div>
+    <div class="card">
+      <h3>Route B parts list, one pair</h3>
+      <p class="cap">Example parts and late-2026 prices for buying one to three. Check each against its datasheet and the board maker's list before ordering.</p>
+      <div class="scroll-x">
+      <table class="plain">
+        <tr><th>Part</th><th>Example</th><th class="num">Price</th><th>Where</th></tr>
+        <tr><td>Android AR-glasses main board (4G, Wi-Fi, BT, GPS, sensors, charger)</td><td>MediaTek MT8781 / MT8768 class, 55 × 16 mm</td><td class="num">$200–600</td><td>Shenzhen ODMs via Alibaba, Global Sources</td></tr>
+        <tr><td>Two micro-OLED displays, 1920 × 1080</td><td>Sony ECX343EN</td><td class="num">$500–1,000</td><td>Framos, Macnica, the ODM</td></tr>
+        <tr><td>Birdbath optics, one per eye</td><td>matched to the 0.39 in panel</td><td class="num">$100–400</td><td>AR optics makers</td></tr>
+        <tr><td>12–13 MP camera and tracking camera</td><td>Sony IMX681 class, OmniVision OV9281</td><td class="num">$35–90</td><td>the ODM, Arducam</td></tr>
+        <tr><td>Speakers, microphones, touchpad, buttons</td><td>Azoteq IQS7211E, C&amp;K KMR2</td><td class="num">$30–110</td><td>Digi-Key, Mouser, LCSC</td></tr>
+        <tr><td>Two battery cells, pogo charging, thermistors</td><td>601045-class Li-polymer</td><td class="num">$30–80</td><td>Grepow, Digi-Key</td></tr>
+        <tr><td>3D-printed frame (three iterations), flex cables, hinges</td><td>SLA or MJF</td><td class="num">$310–1,230</td><td>JLCPCB, PCBWay, Xometry</td></tr>
+        <tr class="total"><td>Parts for one pair</td><td></td><td class="num">about $1.2–3.5k</td><td></td></tr>
+      </table>
+      </div>
+      <p class="small muted" style="margin-top:14px">The Android apps written on routes A and B carry straight over to the production glasses. A starter launcher app, the full parts list, wiring, sizes and an 18-week build plan are in the repository's <a href="https://github.com/saji1970/aurora-nano-u/blob/main/docs/glasses-build-package.md">build package</a>.</p>
+    </div>
+  </div>
+</section>
+
 <!-- FUNDING -->
 <section class="funding" id="funding" style="padding-top:40px">
   <div class="wrap reveal">
-    <div class="eyebrow">10 · Funding requirement</div>
+    <div class="eyebrow">11 · Funding requirement</div>
     <h2>$17.7M, in three gated stages.</h2>
     <p class="lede">Each stage is released only when the stage before hits its milestones, so investors fund the next risk only after the last one is retired. The realistic range is $13–22M depending on quotes, team location and prototype rounds. Adding the camera and the app platform raised the ask from $16.25M by $1.45M.</p>
 
